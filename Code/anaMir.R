@@ -7,7 +7,6 @@ library(anamiR)
 
 
 # Get data in correct format
-setwd('C:/Users/jipde/OneDrive/school/1. Master/Project_01')
 df = read.delim('Data/GeneExpressionNormalized.txt', check.names = FALSE) #Load expression data
 df2 = read.delim('Data/miRNAexpression.txt', check.names = FALSE) #Load miRNA expression data
 
