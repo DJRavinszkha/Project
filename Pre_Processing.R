@@ -1,3 +1,12 @@
+#=============================================================================#
+# Project Period, Liver cholestasis data analysis         												  
+#																			  
+# Version: 1.0   															  
+# Date: 9-1-2020											             	  
+# Author:  Jip de Kok, Stefan Meier, Ariadna Fosch & Ravin Schmidl                                    
+#=============================================================================#
+
+
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
 
@@ -7,9 +16,8 @@ library(anamiR)
 
 
 # Get data in correct format
-setwd('C:/Users/jipde/OneDrive/school/1. Master/Project_01')
-df = read.delim('Data/GeneExpressionNormalized.txt', check.names = FALSE) #Load expression data
-df2 = read.delim('Data/miRNAexpression.txt', check.names = FALSE) #Load miRNA expression data
+df = read.delim('/Users/ravinschmidl/Desktop/Systems_Bio/Project/wetransfer-cb1c0d/PRO4002_Data/DataProject/GeneExpressionNormalized.txt', check.names = FALSE) #Load expression data
+df2 = read.delim('/Users/ravinschmidl/Desktop/Systems_Bio/Project/wetransfer-cb1c0d/PRO4002_Data/DataProject/miRNAexpression.txt', check.names = FALSE) #Load miRNA expression data
 
 
 key <- df[,1:2] # Key for maintaining gene symbol and entrez gene ID
@@ -21,8 +29,7 @@ mrna = df[,2:30] # Genrate dataframe with expression values; no entrezID
   #and mRNA sample is FGS_01_410978_1_1
 
 #=== Here we change the columns names of df (mRNA samples) to the sample names ===
-    # ...write code...
-    # Pretinding to do stuff.....
+    #...write code...
 
 #=== Here we change the columns names of df2 (miRNA samples) to the sample names ===
 labels = read.delim("Data/colNames.csv", sep = ',', header = FALSE, colClasses = 'character')
