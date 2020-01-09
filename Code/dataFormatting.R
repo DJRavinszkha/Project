@@ -105,12 +105,6 @@ format <- function(){
   # Summarised experiment class #
   #=============================#
   
-  # First we change the dataframes into matrices as the miRrna package works with matrices.
-  pheno.mrna <- as.matrix(pheno.mrna)
-  pheno.mirna <- as.matrix(pheno.mirna)
-  mrna = data.matrix(mrna)
-  mirna = data.matrix(mirna)
-  
   # Set rownames for mrna
   rownames(mrna) <- mrna[,1]
   mrna <- mrna[,2:29]
@@ -119,9 +113,45 @@ format <- function(){
   rownames(mirna) <- mirna[,1]
   mirna <- mirna[,2:29]
   
+  # First we change the dataframes into matrices as the miRrna package works with matrices.
+  pheno.mrna <- as.matrix(pheno.mrna)
+  pheno.mirna <- as.matrix(pheno.mirna)
+  mrna = data.matrix(mrna)
+  mirna = data.matrix(mirna)
+  
   # Fill NA's with mean for the time-being
   mrna[is.na(mrna)] <- mean(mrna, na.rm = TRUE)
   mirna[is.na(mirna)] <- mean(mirna, na.rm = TRUE)
+  
+  # Remove drained cases from mrna
+  index = rep(TRUE, length(colnames(mrna)))
+  for(i in 1:length(colnames(mrna))){
+    # if current column name is present in a list of all column names of cases:
+    if(colnames(mrna)[i] %in% pheno.mrna[pheno.mrna[,2]=="drained",1]){
+      index[i] <- FALSE
+    }
+  }
+  mrna <- mrna[,index]
+  
+  # Remove drained cases from mirna
+  index = rep(TRUE, length(colnames(mirna)))
+  for(i in 1:length(colnames(mirna))){
+    # if current column name is present in a list of all column names of cases:
+    if(colnames(mirna)[i] %in% pheno.mirna[pheno.mirna[,2]=="drained",1]){
+      index[i] <- FALSE
+    }
+  }
+  mirna <- mirna[,index]
+  
+  # Remove drained cases from the phenotype data
+  pheno.mrna <- pheno.mrna[!(pheno.mrna[,2]=="drained"),]
+  pheno.mirna <- pheno.mirna[!(pheno.mirna[,2]=="drained"),]
+  
+  # Set first column of phenotype data as rowname
+  rownames(pheno.mrna) <- pheno.mrna[,1]
+  pheno.mrna <- pheno.mrna[,2:3]
+  pheno.mirna <- pheno.mrna # pheno.mirna is identical to pheno.mrna (for clarity they both exist)
+  
   
   return(mrna, mirna, labels, pheno.mrna, pheno.mirna, key)
 }

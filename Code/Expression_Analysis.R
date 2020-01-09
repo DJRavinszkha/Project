@@ -25,8 +25,8 @@ process <- function(mrna, mirna, pheno.mrna, pheno.mirna){
     colData = pheno.mirna)
   
     mrna_d <- differExp_discrete(se = mrna_se,
-                               class = "ER", method = "t.test",
-                               t_test.var = FALSE, log2 = TRUE,
+                               class = "ER", method = "wilcox.test",
+                               t_test.var = FALSE, log2 = FALSE,
                                p_value.cutoff = 0.05,  logratio = 0.5
     )
     
@@ -36,7 +36,24 @@ process <- function(mrna, mirna, pheno.mrna, pheno.mirna){
                                   t_test.var = FALSE, log2 = FALSE,
                                   p_value.cutoff = 0.05,  logratio = 0.5
     )
+    
+    
+    # Perform manual t-test
+    index = rep(FALSE, length(colnames(mrna)))
+    for(i in 1:length(colnames(mrna))){
+      # if current column name is present in a list of all column names of cases:
+      if(colnames(mrna)[i] %in% pheno.mrna[pheno.mrna[,3]=="case",1]){
+        index[i] <- TRUE
+      }
+    }
+    
+    mrna.case <- mrna[,index]
+    mrna.control <- mrna[,!index]
+    t.results = t.test(mrna.case, mrna.control)
+    
+    
 }
+
 
 
 
