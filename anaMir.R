@@ -7,8 +7,8 @@ library(anamiR)
 
 
 # Get data in correct format
-df = read.delim('Data/GeneExpressionNormalized.txt', check.names = FALSE) #Load expression data
-df2 = read.delim('Data/miRNAexpression.txt', check.names = FALSE) #Load miRNA expression data
+df = read.delim('/Users/Ariadna/Documents/GitHub/Project/wetransfer-cb1c0d/PRO4002_Data/DataProject/GeneExpressionNormalized.txt', check.names = FALSE) #Load expression data
+df2 = read.delim('/Users/Ariadna/Documents/GitHub/Project/wetransfer-cb1c0d/PRO4002_Data/DataProject/miRNAexpression.txt', check.names = FALSE) #Load miRNA expression data
 
 
 key <- df[,1:2] # Key for maintaining gene symbol and entrez gene ID
@@ -38,6 +38,7 @@ for (i in rep(2:length(colnames(df2)))){
     }
   }
 }
+
 colnames(df2) <- columns
 
 
