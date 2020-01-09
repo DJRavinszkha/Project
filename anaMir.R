@@ -20,7 +20,8 @@ mrna = df[,2:30] # Genrate dataframe with expression values; no entrezID
   #and mRNA sample is FGS_01_410978_1_1
 
 #=== Here we change the columns names of df (mRNA samples) to the sample names ===
-    #...write code...
+    # ...write code...
+    # Pretinding to do stuff.....
 
 #=== Here we change the columns names of df2 (miRNA samples) to the sample names ===
 labels = read.delim("Data/colNames.csv", sep = ',', header = FALSE, colClasses = 'character')
