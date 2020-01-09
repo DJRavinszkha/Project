@@ -1,3 +1,15 @@
+#=============================================================================#
+# MCF7_HypoxiaExperiment_RawExpressionData_Assignment_Ravin.Rmd           												  
+#																			  
+# Version: 1.0   															  
+# Date: 19-12-2019											             	  
+# Author:  Ravin Schmidl                                    
+#=============================================================================#
+
+
+## STEP 1: Packages
+
+
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
 
@@ -7,8 +19,8 @@ library(anamiR)
 
 
 # Get data in correct format
-df = read.delim('Data/GeneExpressionNormalized.txt', check.names = FALSE) #Load expression data
-df2 = read.delim('Data/miRNAexpression.txt', check.names = FALSE) #Load miRNA expression data
+df = read.delim('/Users/ravinschmidl/Desktop/Systems_Bio/Project/wetransfer-cb1c0d/PRO4002_Data/DataProject/GeneExpressionNormalized.txt', check.names = FALSE) #Load expression data
+df2 = read.delim('/Users/ravinschmidl/Desktop/Systems_Bio/Project/wetransfer-cb1c0d/PRO4002_Data/DataProject/miRNAexpression.txt', check.names = FALSE) #Load miRNA expression data
 
 
 key <- df[,1:2] # Key for maintaining gene symbol and entrez gene ID
