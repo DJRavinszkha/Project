@@ -1,13 +1,10 @@
 #=============================================================================#
-# MCF7_HypoxiaExperiment_RawExpressionData_Assignment_Ravin.Rmd           												  
+# Project Period, Liver cholestasis data analysis         												  
 #																			  
 # Version: 1.0   															  
-# Date: 19-12-2019											             	  
-# Author:  Ravin Schmidl                                    
+# Date: 9-1-2020											             	  
+# Author:  Jip de Kok, Stefan Meier, Ariadna Fosch & Ravin Schmidl                                    
 #=============================================================================#
-
-
-## STEP 1: Packages
 
 
 if (!requireNamespace("BiocManager", quietly = TRUE))
