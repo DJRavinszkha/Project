@@ -55,6 +55,61 @@ for (i in rep(2:length(colnames(mirna)))){
 }
 colnames(mirna) <- columns
 
-# Create phenotype data
-pheno <- labels
+#=============================#
+# Create phenotype data       #
+#=============================#
+pheno.mrna = labels
+pheno.mrna[[1]] <- colnames(mrna)[2:29]
+colnames(pheno.mrna) <- c("", "Subtype", "ER")
 
+# Set controls
+case <- pheno.mrna[,'Subtype'] == "cholestatic"
+pheno.mrna[case,3] <- 'case'
+
+# Set drained
+case <- pheno.mrna[,'Subtype'] == "drained"
+pheno.mrna[case,3] <- 'case'
+
+# set controls
+case <- pheno.mrna[,'Subtype'] == "control"
+pheno.mrna[case,3] <- 'control'
+
+# Order cases and controls
+pheno.mrna <- pheno.mrna[order(as.character(pheno.mrna$ER)),]
+
+# Set pheno.mirna which is identical to pheno.mrna
+pheno.mirna = pheno.mrna
+
+
+
+#=============================#
+# Summarised experiment class #
+#=============================#
+# First we change the dataframes into matrices as the miRrna package works with matrices.
+pheno.mrna <- as.matrix(pheno.mrna)
+pheno.mirna <- as.matrix(pheno.mirna)
+mrna = data.matrix(mrna)
+
+# Set rownames for mrna
+rownames(mrna) <- mrna[,1]
+mrna <- mrna[,2:29]
+
+# remove N
+
+se <- normalization(data = mrna2, method = "quantile")
+
+mrna_se <- SummarizedExperiment::SummarizedExperiment(
+  assays = S4Vectors::SimpleList(counts=mrna),
+  colData = pheno.mrna)
+
+mirna_se <- SummarizedExperiment::SummarizedExperiment(
+  assays = S4Vectors::SimpleList(counts=mirna),
+  colData = pheno.mirna)
+
+
+
+mrna_d <- differExp_discrete(se = mrna_se,
+                             class = "ER", method = "t.test",
+                             t_test.var = FALSE, log2 = TRUE,
+                             p_value.cutoff = 0.05,  logratio = 0.5
+)
