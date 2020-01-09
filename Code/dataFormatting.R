@@ -60,7 +60,7 @@ for (i in rep(2:length(colnames(mirna)))){
 colnames(mirna) <- columns
 
 #=== Here we initialise the sample grouping ===
-sampleGroups <- read.delim("Data/SampleGroups.csv", sep = ',', header = TRUE, colClasses = 'character')
+sampleGroups <- read.delim("../Data/SampleGroups.csv", sep = ',', header = TRUE, colClasses = 'character')
 sampleGroups <- sampleGroups[,6:7]
 
 index_cholestatic <- sampleGroups == 'cholestatic'
