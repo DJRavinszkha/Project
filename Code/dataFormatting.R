@@ -1,6 +1,5 @@
 #=============================================================================#
 # Project Period, Liver cholestasis data analysis         												  
-#	
 # Version: 1.0   															  
 # Date: 9-1-2020											             	  
 # Author:  Jip de Kok, Stefan Meier, Ariadna Fosch & Ravin Schmidl                                    
@@ -9,22 +8,26 @@
 #===================#
 ## Data Formatting ##
 #===================#
+
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
 
 BiocManager::install("anamiR")
 
 library(anamiR)
+library(rstudioapi)
+
 
 
 # Get data in correct format
-setwd('/Users/ravinschmidl/Desktop/Systems_Bio/Project')
-mrna = read.delim('Data/GeneExpressionNormalized.txt', check.names = FALSE) #Load expression data
-mirna = read.delim('Data/miRNAexpression.txt', check.names = FALSE) #Load miRNA expression data
+current_path <- getActiveDocumentContext()$path 
+setwd(dirname(current_path ))
+mrna = read.delim('../Data/GeneExpressionNormalized.txt', check.names = FALSE) #Load expression data
+mirna = read.delim('../Data/miRNAexpression.txt', check.names = FALSE) #Load miRNA expression data
 
 
 key <- mrna[,1:2] # Key for maintaining gene symbol and entrez gene ID
-mrna = mrna[,2:30] # Genrate dataframe with expression values; no entrezID
+
 
 # Column names are different for miRNA and mRNA datasets, but are conserved with sample names in SampleGroups.xlsx
 #IE FGS_01 is the name of sample 1; 
@@ -32,11 +35,14 @@ mrna = mrna[,2:30] # Genrate dataframe with expression values; no entrezID
   #and mRNA sample is FGS_01_410978_1_1
 
 #=== Here we change the columns names of mrna (mRNA samples) to the sample names ===
-    # ...write code...
-    # Pretinding to do stuff.....
+mrna = subset(mrna, select = -2) # Remove gene symbol column
+columns = colnames(mrna)
+columns[2:29] <- substr(unlist(columns[2:29]), 1, 6) #Only keep first 6 characters of column names
+colnames(mrna) <- columns # Assign this to the actual column names
 
 #=== Here we change the columns names of mirna (miRNA samples) to the sample names ===
-labels = read.delim("Data/colNames.csv", sep = ',', header = FALSE, colClasses = 'character')
+labels = read.delim("../Data/colNames.csv", sep = ',', header = FALSE, colClasses = 'character')
+
 
 columns = colnames(mirna)
 columns[[1]] <- 'miRNA'
@@ -64,4 +70,6 @@ sampleGroups$id[index_drained[,1]] <- 2
 index_control <- sampleGroups == 'control'
 sampleGroups$id[index_control[,1]] <- 3
 
+# Create phenotype data
+pheno <- labels
 
