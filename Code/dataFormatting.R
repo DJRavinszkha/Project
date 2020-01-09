@@ -75,22 +75,13 @@ PCAtry<- data.frame(c(pcaRes@scores[,1]),
                     pcaRes@scores[,3],
                     pcaRes@scores[,4],
                     pcaRes@scores[,5],
-                    labels$V2)
-colnames(PCAtry) = c("PCA1", "PCA2", "PCA3", "PCA4", "PCA5")
+                    treat=labels$V2)
+colnames(PCAtry) = c("PCA1", "PCA2", "PCA3", "PCA4", "PCA5","treat")
 
 ggplot(PCAtry, aes(x = PCA1, y = PCA2)) +
-  geom_point() +
+  geom_point(aes(colour = PCAtry$treat)) +
   scale_colour_manual(labels = c("chol", "dil", "contr"),
                       values = c("#04179b", "#da9e00", "#198c19"),
-                      aesthetics = "fill")+
+                      aesthetics = "fill") +
   theme_light()
 
-# attempt with autoplot
-table <- data.frame(long_format_all[!is.na(long_format_all$values),])
-
-pca.obj <- prcomp(table$values, center=TRUE, scale.=TRUE)
-
-autoplot(pca.obj)
-
-pcaRes2<- prcomp(na.omit(mirna), center = TRUE, scale = TRUE)
-autoplot(pcaRes2, )
