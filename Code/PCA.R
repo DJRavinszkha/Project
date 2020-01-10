@@ -1,4 +1,7 @@
-
+require(limma)
+require(pcaMethods)
+require(gplots)
+require(ggplot2)
 # MIRNA pca for 28 samples
 mirna[is.na(mirna)] <- NA # change Nan for NA
 pcaRes <- pca(t(mirna[,2:29]),nPcs = 10)  # perform PCA
@@ -67,3 +70,7 @@ ggplot(PCA_1758mrna, aes(x = PCA1, y = PCA2)) +
                       aesthetics = "fill") +
   theme_light()
 
+############# HEAT MAP ######################
+
+heatmap.2(as.matrix(mrna[,2:29]), trace = "none", main="mRNA heatmap")
+heatmap.2(as.matrix(na.omit(mirna[,2:29])), trace = "none", main="miRNA heatmap")
