@@ -2,6 +2,8 @@ require(limma)
 require(pcaMethods)
 require(gplots)
 require(ggplot2)
+library(FactoMineR)
+library(factoextra)
 # MIRNA pca for 28 samples
 mirna[is.na(mirna)] <- NA # change Nan for NA
 pcaRes <- pca(t(mirna[,2:29]),nPcs = 10)  # perform PCA
@@ -74,3 +76,17 @@ ggplot(PCA_1758mrna, aes(x = PCA1, y = PCA2)) +
 
 heatmap.2(as.matrix(mrna[,2:29]), trace = "none", main="mRNA heatmap")
 heatmap.2(as.matrix(na.omit(mirna[,2:29])), trace = "none", main="miRNA heatmap")
+
+############# Use Factominer to complete PCA and HCPC ######################
+res.pca <- PCA(mrna[,2:29], ncp = 3, graph = FALSE)
+# Compute hierarchical clustering on principal components
+res.hcpc <- HCPC(res.pca, graph = FALSE)
+
+fviz_dend(res.hcpc, 
+          cex = 0.7,                     # Label size
+          palette = "jco",               # Color palette see ?ggpubr::ggpar
+          rect = TRUE, rect_fill = TRUE, # Add rectangle around groups
+          rect_border = "jco",           # Rectangle color
+          labels_track_height = 0.8      # Augment the room for labels
+)
+
