@@ -52,6 +52,17 @@ process <- function(mrna, mirna, pheno.mrna, pheno.mirna){
     t.results = t.test(mrna.case, mrna.control)
     
     
+    #====================================#
+    ## Correlation Analysis             ##
+    #====================================#
+    cor <- negative_cor(mrna_data = as.matrix(mrna_d), mirna_data = as.matrix(mirna_d),
+                        method = c("pearson"), cut.off = -0.5)
+    
+ 
+    mirna_21 <- miR_converter(data = mirna_d, remove_old = TRUE,
+                              original_version = 17, latest_version = 21)
+    
+    
 }
 
 

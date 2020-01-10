@@ -15,11 +15,13 @@
 #===================#
 
 if (!requireNamespace("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
+  install.packages("BiocManager", "limma")
 
 BiocManager::install("anamiR")
 
+
 library(anamiR)
+library(limma)
 library(rstudioapi)
 
 format <- function(){
@@ -64,6 +66,14 @@ format <- function(){
   }
   colnames(mirna) <- columns
   
+  # Set rownames for mrna
+  rownames(mrna) <- mrna[,1]
+  mrna <- mrna[,2:29]
+  
+  # Set rownames for mirna
+  rownames(mirna) <- mirna[,1]
+  mirna <- mirna[,2:29]
+  
   #=== Here we initialise the sample grouping ===
   sampleGroups <- read.delim("Data/SampleGroups.csv", sep = ',', header = TRUE, colClasses = 'character')
   sampleGroups <- sampleGroups[,6:7]
@@ -76,10 +86,70 @@ format <- function(){
   sampleGroups$id[index_control[,1]] <- 3
   
   #=============================#
+  # Different gene expression  #
+  #=============================#
+  
+  # First we identify differentially expressed genes for the mRNA's
+  design_matrix <- model.matrix(~ 0 + factor(c(1,1,1,1,1,1,1,1,1,
+                                               2,2,2,2,2,2,2,2,2,2,
+                                               3,3,3,3,3,3,3,3,3)))
+  
+  colnames(design_matrix) <- c("cholestasis", "drained", "control")
+  
+  cont_matrix <- makeContrasts (drained_v_control = drained - control,
+                                cholestasis_v_control = cholestasis - control,
+                                cholestasis_v_drained = cholestasis - drained,
+                                levels = design_matrix)
+  
+  fit <- lmFit(mrna, design_matrix)
+  
+  fit_contrast <- contrasts.fit(fit, cont_matrix)
+  
+  fit_contrast <- eBayes(fit_contrast)
+  
+  results <- decideTests(fit_contrast)
+  
+  summary(results)
+  
+  top_genes <- topTable (fit_contrast, number = nrow(mrna), adjust = "BH")
+  
+  # Subsequently we do the same for the miRNA data
+  design_matrix <- model.matrix(~ 0 + factor(c(1,1,1,1,1,1,1,1,1,
+                                               2,2,2,2,2,2,2,2,2,2,
+                                               3,3,3,3,3,3,3,3,3)))
+  
+  colnames(design_matrix) <- c("cholestasis", "drained", "control")
+  
+  cont_matrix <- makeContrasts (drained_v_control = drained - control,
+                                cholestasis_v_control = cholestasis - control,
+                                cholestasis_v_drained = cholestasis - drained,
+                                levels = design_matrix)
+  #Here we change NA's with rownmeans SHOULD BE CHANGED LATER!!!
+  omitmirna <- mirna
+  
+  # # We set the rownames of omitmirna to its first column
+  rownames(omitmirna) <- omitmirna[[1]]
+  omitmirna <- omitmirna[,2:length(omitmirna)]
+  
+  omitmirna[is.na(omitmirna)] <- mean(as.matrix(mirna), na.rm = TRUE)
+  
+  fit2 <- lmFit(omitmirna, design_matrix)
+  
+  fit_contrast2 <- contrasts.fit(fit2, cont_matrix)
+  
+  fit_contrast2 <- eBayes(fit_contrast2)
+  
+  results2 <- decideTests(fit_contrast2)
+  
+  summary(results2)
+  
+  top_genes2 <- topTable (fit_contrast2, number = nrow(mirna), adjust = "BH")
+  
+  #=============================#
   # Create phenotype data       #
   #=============================#
   pheno.mrna = labels
-  pheno.mrna[[1]] <- colnames(mrna)[2:29]
+  pheno.mrna[[1]] <- colnames(mrna)
   colnames(pheno.mrna) <- c("", "Subtype", "ER")
   
   # Set controls
@@ -100,18 +170,13 @@ format <- function(){
   # Set pheno.mirna which is identical to pheno.mrna
   pheno.mirna = pheno.mrna
   
-  
   #=============================#
   # Summarised experiment class #
   #=============================#
   
-  # Set rownames for mrna
-  rownames(mrna) <- mrna[,1]
-  mrna <- mrna[,2:29]
+
   
-  # Set rownames for mirna
-  rownames(mirna) <- mirna[,1]
-  mirna <- mirna[,2:29]
+  
   
   # First we change the dataframes into matrices as the miRrna package works with matrices.
   pheno.mrna <- as.matrix(pheno.mrna)
@@ -147,11 +212,72 @@ format <- function(){
   pheno.mrna <- pheno.mrna[!(pheno.mrna[,2]=="drained"),]
   pheno.mirna <- pheno.mirna[!(pheno.mirna[,2]=="drained"),]
   
-  # Set first column of phenotype data as rowname
-  rownames(pheno.mrna) <- pheno.mrna[,1]
-  pheno.mrna <- pheno.mrna[,2:3]
-  pheno.mirna <- pheno.mrna # pheno.mirna is identical to pheno.mrna (for clarity they both exist)
   
+  
+  #=============================#
+  # Change DE gene table format #
+  #=============================#
+  # First we change the layout for the mRNA data
+  mrna_d <- top_genes[,c(2,6,7)]
+  mrna_d[["mean_case"]] <- 0
+  mrna_d[["mean_control"]] <- 0
+  
+  # Seperate controls from cases
+  index = rep(FALSE, length(colnames(mrna)))
+  for(i in 1:length(colnames(mrna))){
+    # if current column name is present in a list of all column names of cases:
+    if(colnames(mrna)[i] %in% pheno.mrna[pheno.mrna[,3]=="case",1]){
+      index[i] <- TRUE
+    }
+  }
+  
+  mrna.case <- mrna[,index]
+  mrna.control <- mrna[,!index]
+  
+  # Calculate means
+  mean_control <- rowMeans(mrna.control)
+  mean_case <- rowMeans(mrna.case)
+  
+  # Include means in mrna_D
+  mrna_d[[4]] <- mean_case
+  mrna_d[[5]] <- mean_control
+  
+  colnames(mrna_d) <- c("log-ratio", "P-Value", "P-adjust", "mean_case", "mean_control")
+  
+  #===========================================#
+  # Now we change the format for the miRNA data
+  #===========================================#
+  mirna_d <- top_genes2[,c(2,6,7)]
+  mirna_d[["mean_case"]] <- 0
+  mirna_d[["mean_control"]] <- 0
+  
+  # Seperate controls from cases
+  index = rep(FALSE, length(colnames(omitmirna)))
+  for(i in 1:length(colnames(omitmirna))){
+    # if current column name is present in a list of all column names of cases:
+    if(colnames(omitmirna)[i] %in% pheno.mirna[pheno.mirna[,3]=="case",1]){
+      index[i] <- TRUE
+    }
+  }
+  
+  mirna.case <- omitmirna[,index]
+  mirna.control <- omitmirna[,!index]
+  
+  # Calculate means
+  mean_control <- rowMeans(mirna.control[,2:length(mirna.control)])
+  mean_case <- rowMeans(mirna.case[,2:length(mirna.case)])
+  
+  # Include means in omitmirna
+  mirna_d[[4]] <- mean_case
+  mirna_d[[5]] <- mean_control
+  
+  colnames(mirna_d) <- c("log-ratio", "P-Value", "P-adjust", "mean_case", "mean_control")
+  
+  # # Set first column of phenotype data as rowname
+  # rownames(pheno.mrna) <- pheno.mrna[,1]
+  # pheno.mrna <- pheno.mrna[,2:3]
+  # pheno.mirna <- pheno.mrna # pheno.mirna is identical to pheno.mrna (for clarity they both exist)
+  # 
   
   return(mrna, mirna, labels, pheno.mrna, pheno.mirna, key)
 }
