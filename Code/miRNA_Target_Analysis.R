@@ -34,6 +34,8 @@ miRNA_correlate <- function(mirna, mrna){
       miRNA_name <- row.names(mirna)[i]
       mRNA_name <- row.names(mrna)[j]
       corMatrix[step,] <- c(miRNA_name, mRNA_name, correlation$estimate[[1]], correlation$p.value)
+      
+      # Update progress bar
       setTxtProgressBar(progress, step)
     }
   }
