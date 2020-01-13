@@ -4,14 +4,15 @@ require(gplots)
 require(ggplot2)
 library(FactoMineR)
 library(factoextra)
+
 # MIRNA pca for 28 samples
 mirna[is.na(mirna)] <- NA # change Nan for NA
-pcaRes <- pca(t(mirna[,2:29]),nPcs = 10)  # perform PCA
-PCA_28mirna_treat<- data.frame(c(pcaRes@scores[,1]),
-                    pcaRes@scores[,2],
-                    pcaRes@scores[,3],
-                    pcaRes@scores[,4],
-                    pcaRes@scores[,5],
+pcaRes_mirna28_treat <- pca(t(mirna[,2:29]),nPcs = 10)  # perform PCA
+PCA_28mirna_treat<- data.frame(c(pcaRes_mirna28_treat@scores[,1]),
+                    pcaRes_mirna28_treat@scores[,2],
+                    pcaRes_mirna28_treat@scores[,3],
+                    pcaRes_mirna28_treat@scores[,4],
+                    pcaRes_mirna28_treat@scores[,5],
                     treat=labels$V2) 
 colnames(PCA_28mirna_treat) = c("PCA1", "PCA2", "PCA3","PCA4", "PCA5", "treat")
 
@@ -23,17 +24,17 @@ ggplot(PCA_28mirna_treat, aes(x = PCA1, y = PCA2)) +
 
 # MIRNA pca for all microRNA (1758)
 mirna[is.na(mirna)] <- NA # change Nan for NA
-pcaRes <- pca(mirna[,2:29],nPcs = 10)  # perform PCA
-PCA_1758mirna<- data.frame(c(pcaRes@scores[,1]),
-                    pcaRes@scores[,2],
-                    pcaRes@scores[,3],
-                    pcaRes@scores[,4],
-                    pcaRes@scores[,5],
+pcaRes_mirna17581_treat <- pca(mirna[,2:29],nPcs = 10)  # perform PCA
+PCA_1758mirna<- data.frame(c(pcaRes_mirna17581_treat@scores[,1]),
+                    pcaRes_mirna17581_treat@scores[,2],
+                    pcaRes_mirna17581_treat@scores[,3],
+                    pcaRes_mirna17581_treat@scores[,4],
+                    pcaRes_mirna17581_treat@scores[,5],
                     treat=labels$V2) 
 colnames(PCA_1758mirna) = c("PCA1", "PCA2", "PCA3","PCA4", "PCA5","treat")
 
 ggplot(PCA_1758mirna, aes(x = PCA1, y = PCA2)) +
-  geom_point(aes(colour = PCA_1758mirna$treat)) +
+  geom_point(aes()) +
   scale_colour_manual(values = c("#04179b", "#da9e00", "#198c19"),
                       aesthetics = "fill") +
   theme_light()
@@ -41,12 +42,12 @@ ggplot(PCA_1758mirna, aes(x = PCA1, y = PCA2)) +
 
 #MRNA for 28 samples
 mrna[is.na(mrna)] <- NA # change Nan for NA
-pcaRes2 <- pca(t(mrna[,2:29]),nPcs = 10)  # perform PCA
-PCA_28mrna_treat<- data.frame(c(pcaRes2@scores[,1]),
-                    pcaRes2@scores[,2],
-                    pcaRes2@scores[,3],
-                    pcaRes2@scores[,4],
-                    pcaRes2@scores[,5],
+pcaRes_mrna28_treat <- pca(t(mrna[,2:29]),nPcs = 10)  # perform PCA
+PCA_28mrna_treat<- data.frame(c(pcaRes_mrna28_treat@scores[,1]),
+                    pcaRes_mrna28_treat@scores[,2],
+                    pcaRes_mrna28_treat@scores[,3],
+                    pcaRes_mrna28_treat@scores[,4],
+                    pcaRes_mrna28_treat@scores[,5],
                     treat=labels$V2) 
 colnames(PCA_28mrna_treat) = c("PCA1", "PCA2", "PCA3","PCA4", "PCA5","treat")
 
@@ -58,12 +59,12 @@ ggplot(PCA_28mrna_treat, aes(x = PCA1, y = PCA2)) +
 
 #MRNA for all microRNA (17581)
 mrna[is.na(mrna)] <- NA # change Nan for NA
-pcaRes2 <- pca(mrna[,2:29],nPcs = 10)  # perform PCA
-PCA_1758mrna<- data.frame(c(pcaRes2@scores[,1]),
-                        pcaRes2@scores[,2],
-                        pcaRes2@scores[,3],
-                        pcaRes2@scores[,4],
-                        pcaRes2@scores[,5]) 
+pcaRes_mrna17581_treat <- pca(mrna[,2:29],nPcs = 10)  # perform PCA
+PCA_1758mrna<- data.frame(c(pcaRes_mrna17581_treat@scores[,1]),
+                        pcaRes_mrna17581_treat@scores[,2],
+                        pcaRes_mrna17581_treat@scores[,3],
+                        pcaRes_mrna17581_treat@scores[,4],
+                        pcaRes_mrna17581_treat@scores[,5]) 
 colnames(PCA_1758mrna) = c("PCA1", "PCA2", "PCA3","PCA4", "PCA5")
 
 ggplot(PCA_1758mrna, aes(x = PCA1, y = PCA2)) +
@@ -90,8 +91,8 @@ fviz_dend(res.hcpc,
           labels_track_height = 0.8      # Augment the room for labels
 )
 
-#############  PCA FOR BATCHES  ######################
-
+#############  PCA FOR BATCHES and SAMPLES ######################
+#need to change from here 
 mrna = read.delim('../Data/GeneExpressionNormalized.txt', check.names = FALSE) #Load expression data
 mrna = subset(mrna, select = -2) # Remove gene symbol column
 names_mrna = colnames(mrna[,2:length(mrna)]) #
@@ -133,8 +134,22 @@ ggplot(PCA_28mirna, aes(x = PCA1, y = PCA2)) +
                       aesthetics = "fill") +
   theme_light()
 
-#### correction for batch that is separated###
+#### TEST PCA WITH CORRECTION###
 
+pcaRes2 <- pca(t(y2),nPcs = 10)  # perform PCA
+PCA_28mrna<- data.frame(c(pcaRes2@scores[,1]),
+                        pcaRes2@scores[,2],
+                        pcaRes2@scores[,3],
+                        pcaRes2@scores[,4],
+                        pcaRes2@scores[,5],
+                        batch= batch_number_mrna) 
+colnames(PCA_28mrna) = c("PCA1", "PCA2", "PCA3","PCA4", "PCA5", "Batches")
+
+ggplot(PCA_28mrna, aes(x = PCA1, y = PCA2)) +
+  geom_point(aes(colour = PCA_28mrna_treat$treat, shape=PCA_28mrna$Batches)) +
+  scale_colour_manual(values = c("#04179b", "#da9e00", "#198c19","#66049b"),
+                      aesthetics = "fill") +
+  theme_light()
 #=========================================#
 # 5. ANOVA 
 #==========================================#
