@@ -7,16 +7,16 @@ library(factoextra)
 # MIRNA pca for 28 samples
 mirna[is.na(mirna)] <- NA # change Nan for NA
 pcaRes <- pca(t(mirna[,2:29]),nPcs = 10)  # perform PCA
-PCA_28mirna<- data.frame(c(pcaRes@scores[,1]),
+PCA_28mirna_treat<- data.frame(c(pcaRes@scores[,1]),
                     pcaRes@scores[,2],
                     pcaRes@scores[,3],
                     pcaRes@scores[,4],
                     pcaRes@scores[,5],
                     treat=labels$V2) 
-colnames(PCA_28mirna) = c("PCA1", "PCA2", "PCA3","PCA4", "PCA5", "treat")
+colnames(PCA_28mirna_treat) = c("PCA1", "PCA2", "PCA3","PCA4", "PCA5", "treat")
 
-ggplot(PCA_28mirna, aes(x = PCA1, y = PCA2)) +
-  geom_point(aes(colour = PCA_28mirna$treat)) +
+ggplot(PCA_28mirna_treat, aes(x = PCA1, y = PCA2)) +
+  geom_point(aes(colour = PCA_28mirna_treat$treat)) +
   scale_colour_manual(values = c("#04179b", "#da9e00", "#198c19"),
                       aesthetics = "fill") +
   theme_light()
@@ -42,16 +42,16 @@ ggplot(PCA_1758mirna, aes(x = PCA1, y = PCA2)) +
 #MRNA for 28 samples
 mrna[is.na(mrna)] <- NA # change Nan for NA
 pcaRes2 <- pca(t(mrna[,2:29]),nPcs = 10)  # perform PCA
-PCA_28mrna<- data.frame(c(pcaRes2@scores[,1]),
+PCA_28mrna_treat<- data.frame(c(pcaRes2@scores[,1]),
                     pcaRes2@scores[,2],
                     pcaRes2@scores[,3],
                     pcaRes2@scores[,4],
                     pcaRes2@scores[,5],
                     treat=labels$V2) 
-colnames(PCA_28mrna) = c("PCA1", "PCA2", "PCA3","PCA4", "PCA5","treat")
+colnames(PCA_28mrna_treat) = c("PCA1", "PCA2", "PCA3","PCA4", "PCA5","treat")
 
-ggplot(PCA_28mrna, aes(x = PCA1, y = PCA2)) +
-  geom_point(aes(colour = PCA_28mrna$treat)) +
+ggplot(PCA_28mrna_treat, aes(x = PCA1, y = PCA2)) +
+  geom_point(aes(colour = PCA_28mrna_treat$treat)) +
   scale_colour_manual(values = c("#04179b", "#da9e00", "#198c19"),
                       aesthetics = "fill") +
   theme_light()
@@ -109,7 +109,7 @@ PCA_28mrna<- data.frame(c(pcaRes2@scores[,1]),
 colnames(PCA_28mrna) = c("PCA1", "PCA2", "PCA3","PCA4", "PCA5", "Batches")
 
 ggplot(PCA_28mrna, aes(x = PCA1, y = PCA2)) +
-  geom_point(aes(colour = PCA_28mrna$Batches)) +
+  geom_point(aes(colour = PCA_28mrna_treat$treat, shape=PCA_28mrna$Batches)) +
   scale_colour_manual(values = c("#04179b", "#da9e00", "#198c19","#66049b"),
                       aesthetics = "fill") +
   theme_light()
