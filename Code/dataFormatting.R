@@ -35,6 +35,7 @@ mirna = read.delim('../Data/miRNAexpression.txt', check.names = FALSE)
 mrna[is.na(mrna)] <- NA # Change all the NaNs to NA in the mRNA object.
 key <- mrna[,1:2] # Key for maintaining gene symbol and entrez gene ID
 
+
 # Column names are different for miRNA and mRNA datasets, but are conserved with sample names in SampleGroups.xlsx
 #IE FGS_01 is the name of sample 1; 
   #where miRNA sample is US10063773_254606410403_S01_miRNA_107_Sep09_1_1 - 2;
@@ -193,9 +194,10 @@ mrna_batch_412287 <- mrna[, c(26, 28, 27, 29), drop=F]
 # THis is just me trying to figure out how to make this work, but we probably should first do PCA and ANOVA to check
 # for actual batch effects
 
-y2 <- removeBatchEffect(batch_410978, batch_410979)
+y2 <- removeBatchEffect(mrna[,2:29], mrna_batch_410978[,2:length(mrna_batch_410978)], mrna_batch_410980[,2:length(mrna_batch_410980)])
+
 par(mfrow=c(1,2))
-boxplot(as.data.frame(batch_410978),main="Original")
+boxplot(as.data.frame(mrna[,3:29]),main="Original")
 boxplot(as.data.frame(y2),main="Batch corrected")
 
 #=========================================#
@@ -216,5 +218,3 @@ merged_data<- merge(data_long, labels_2$V2) # merge dataset. Can take a few min.
 merged_data<- subset(merged_data, select=c("values","y")) # then select only the colums of the expression and the treatment. 
 # Can take a few min. 
 control_vs_chole<- pairwise.t.test(merged_data$values,merged_data$y, p.adjust.method = "BH") # This doesn't give good results
-
-

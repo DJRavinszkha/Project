@@ -132,4 +132,15 @@ ggplot(PCA_28mirna, aes(x = PCA1, y = PCA2)) +
   scale_colour_manual(values = c("#04179b", "#da9e00", "#198c19","#66049b"),
                       aesthetics = "fill") +
   theme_light()
+
 #### correction for batch that is separated###
+
+#=========================================#
+# 5. ANOVA 
+#==========================================#
+means<- data.frame(rowMeans(t(mrna[,2:29]),na.rm = TRUE))
+batch<-batch_number_mrna
+anova_Test<- aov(means[,1]~batch[,1])
+summary(anova_Test)
+TukeyHSD(anova_Test, ordered = FALSE, conf.level = 0.95)
+
