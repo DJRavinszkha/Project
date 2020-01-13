@@ -53,7 +53,6 @@ current_path <- getActiveDocumentContext()$path
 setwd(dirname(current_path ))
 
 mrna = read.delim('../Data/GeneExpressionNormalized.txt', check.names = FALSE) #Load expression data
-
 mirna = read.delim('../Data/miRNAexpression.txt', check.names = FALSE)
 
 mrna[is.na(mrna)] <- NA # Change all the NaNs to NA in the mRNA object.
@@ -202,7 +201,7 @@ results2 <- decideTests(fit_contrast2)
 
 summary(results2)
 
-top_genes2 <- topTable (fit_contrast2, p.value = "0.05", number = nrow(mirna), adjust = "BH") 
+top_genes2 <- topTable (fit_contrast2, number = nrow(mirna), adjust = "BH") 
 
 #==============
 #cc <- cor(mrna[,2:29])
@@ -235,6 +234,6 @@ drained_mrna<-mrna[match(drained$SampleName, colnames(mrna))]
 cholestatic_mrna<-mrna[match(cholestatic$SampleName, colnames(mrna))]
 controls_mrna<-mrna[match(controls$SampleName, colnames(mrna))]
 
-pairwise.t.test(, p.adjust.method = "BH") #ask the group about how to make the comparison between the different groups
+control_vs_chole<- pairwise.t.test(controls_mrna,cholestatic_mrna), p.adjust.method = "BH") #ask the group about how to make the comparison between the different groups
 
 
