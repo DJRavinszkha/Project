@@ -234,6 +234,6 @@ drained_mrna<-mrna[match(drained$SampleName, colnames(mrna))]
 cholestatic_mrna<-mrna[match(cholestatic$SampleName, colnames(mrna))]
 controls_mrna<-mrna[match(controls$SampleName, colnames(mrna))]
 
-control_vs_chole<- pairwise.t.test(controls_mrna,cholestatic_mrna), p.adjust.method = "BH") #ask the group about how to make the comparison between the different groups
+control_vs_chole<- pairwise.t.test(controls_mrna,cholestatic_mrna, p.adjust.method = "BH") #ask the group about how to make the comparison between the different groups
 
 
