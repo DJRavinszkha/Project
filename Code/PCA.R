@@ -132,3 +132,4 @@ ggplot(PCA_28mirna, aes(x = PCA1, y = PCA2)) +
   scale_colour_manual(values = c("#04179b", "#da9e00", "#198c19","#66049b"),
                       aesthetics = "fill") +
   theme_light()
+#### correction for batch that is separated###

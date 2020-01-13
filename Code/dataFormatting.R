@@ -210,8 +210,11 @@ drained_mrna<-mrna[match(drained$SampleName, colnames(mrna))]
 cholestatic_mrna<-mrna[match(cholestatic$SampleName, colnames(mrna))]
 controls_mrna<-mrna[match(controls$SampleName, colnames(mrna))]
 
-control_vs_chole<- pairwise.t.test(controls_mrna,cholestatic_mrna, p.adjust.method = "BH") #ask the group about how to make the comparison between the different groups
-
-
+labels_2<-labels[,2:3] # get treatment and mrna id
+data_long<-stack(mrna[,2:29],colnames(mrna[,2:29])) # data in long format
+merged_data<- merge(data_long, labels_2$V2) # merge dataset. Can take a few min. 
+merged_data<- subset(merged_data, select=c("values","y")) # then select only the colums of the expression and the treatment. 
+# Can take a few min. 
+control_vs_chole<- pairwise.t.test(merged_data$values,merged_data$y, p.adjust.method = "BH") # This doesn't give good results
 
 
