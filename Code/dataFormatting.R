@@ -25,7 +25,6 @@ library(limma)
 library(rstudioapi)
 
 format <- function(){
-  
   # Get data in correct format
   current_path <- getActiveDocumentContext()$path 
   setwd(dirname(current_path ))
@@ -75,7 +74,7 @@ format <- function(){
   mirna <- mirna[,2:29]
   
   #=== Here we initialise the sample grouping ===
-  sampleGroups <- read.delim("Data/SampleGroups.csv", sep = ',', header = TRUE, colClasses = 'character')
+  sampleGroups <- read.delim("../Data/SampleGroups.csv", sep = ',', header = TRUE, colClasses = 'character')
   sampleGroups <- sampleGroups[,6:7]
   
   index_cholestatic <- sampleGroups == 'cholestatic'
@@ -127,10 +126,6 @@ format <- function(){
   #Here we change NA's with rownmeans SHOULD BE CHANGED LATER!!!
   omitmirna <- mirna
   
-  # # We set the rownames of omitmirna to its first column
-  rownames(omitmirna) <- omitmirna[[1]]
-  omitmirna <- omitmirna[,2:length(omitmirna)]
-  
   omitmirna[is.na(omitmirna)] <- mean(as.matrix(mirna), na.rm = TRUE)
   
   fit2 <- lmFit(omitmirna, design_matrix)
@@ -173,10 +168,6 @@ format <- function(){
   #=============================#
   # Summarised experiment class #
   #=============================#
-  
-
-  
-  
   
   # First we change the dataframes into matrices as the miRrna package works with matrices.
   pheno.mrna <- as.matrix(pheno.mrna)
@@ -238,15 +229,15 @@ format <- function(){
   mean_control <- rowMeans(mrna.control)
   mean_case <- rowMeans(mrna.case)
   
-  # Include means in mrna_D
+  # Include means in mrna_d
   mrna_d[[4]] <- mean_case
   mrna_d[[5]] <- mean_control
   
   colnames(mrna_d) <- c("log-ratio", "P-Value", "P-adjust", "mean_case", "mean_control")
   
-  #===========================================#
-  # Now we change the format for the miRNA data
-  #===========================================#
+  #=============================================#
+  # Now we change the format for the miRNA data #
+  #=============================================#
   mirna_d <- top_genes2[,c(2,6,7)]
   mirna_d[["mean_case"]] <- 0
   mirna_d[["mean_control"]] <- 0
