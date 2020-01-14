@@ -162,9 +162,9 @@ mrna_d[[5]] <- mean_control
 
 colnames(mrna_d) <- c("log-ratio", "P-Value", "P-adjust", "mean_case", "mean_control")
 
-#=============================================#
-# Now we change the format for the miRNA data #   #Need to be adapted, omitmirna
-#=============================================#
+#===============================================#
+## Now we change the format for the miRNA data ##   #Need to be adapted, omitmirna
+#===============================================#
 mirna_d <- top_genes2[,c(2,6,7)]
 mirna_d[["mean_case"]] <- 0
 mirna_d[["mean_control"]] <- 0
@@ -219,9 +219,9 @@ par(mfrow=c(1,2))
 boxplot(as.data.frame(batch_410978),main="Original")
 boxplot(as.data.frame(y2),main="Batch corrected")
 
-#=========================================#
-# 4. PAIRWISE T TEST: Separation on groups and controls. (Still work in progress)
-#==========================================#
+#=========================================================#
+## 4. PAIRWISE T TEST: Separation on groups and controls ##   (Still work in progress)
+#=========================================================#
 
 controls <- subset(sampleGroups, Treatment== "control")
 cholestatic<- subset(sampleGroups, Treatment== "cholestatic")

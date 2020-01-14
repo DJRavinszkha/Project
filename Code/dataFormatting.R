@@ -99,7 +99,7 @@ format <- function(){
   mirna <- mirna[,2:29] #set mirna to only contain expression values
   
   #=============================#
-  # Create phenotype data       #     # Do we need this?
+  ##   Create phenotype data   ##     # Do we need this?
   #=============================#
   # pheno.mrna = labels
   # pheno.mrna[[1]] <- colnames(mrna)
@@ -123,9 +123,9 @@ format <- function(){
   # # Set pheno.mirna which is identical to pheno.mrna
   # pheno.mirna = pheno.mrna
   # 
-  #=============================#
-  # Summarised experiment class #   #Do we need this?
-  #=============================#
+  #===============================#
+  ## Summarised experiment class ##   #Do we need this?
+  #===============================#
   
   # First we change the dataframes into matrices as the miRrna package works with matrices.
   # pheno.mrna <- as.matrix(pheno.mrna)

@@ -54,9 +54,9 @@ mrna.batches <- data.frame(batch = labels$mRNA.batch, batch.id = labels$mRNA.bat
 # Get batch order mirna
 mirna.batches <- data.frame(batch = labels$miRNA.batch, batch.id = labels$miRNA.batch.id, file = labels$mRNA.file)
 
-#=======================#
-# 2. PCA for mRNA DATA  # 
-#=======================#
+#=========================#
+## 2. PCA for mRNA DATA  ## 
+#=========================#
                         # Notes: 1. Batch_number_mrna changed to mrna.batches
                         #        2. Batch_num changed to batch
                         #        3. PCA_mrna changed to mrna.PCA
@@ -102,9 +102,9 @@ ggplot(mrna.PCA, aes(x = PCA1, y = PCA2)) +
 #                       aesthetics = "fill") + theme_light() + 
 #                       ggtitle("mRNA Treatment pca")
 
-#=======================#
-# 3. PCA for miRNA DATA #
-#=======================#
+#=========================#
+## 3. PCA for miRNA DATA ##
+#=========================#
                         # Notes: 1. Batch_number_mirna changed to mirna.batches
                         #        2. Batch_num changed to batch
                         #        3. PCA_mirna changed to mirna.PCA
@@ -150,18 +150,18 @@ ggplot(mirna.PCA, aes(x = PCA1, y = PCA2)) +
 
 ##########
 
-#==============#
-# 4. Heat maps #
-#==============#
+#================#
+## 4. Heat maps ##
+#================#
 # Don't remove only silenced because it takes too much time to run. 
 
 #heatmap.2(as.matrix(mrna), trace = "none", main="mRNA heatmap")
 #heatmap.2(as.matrix(na.omit(mirna)), trace = "none", main="miRNA heatmap")
 
 
-#======================================================================#
-# 5. PCA showing batches and treatment simultaneously (symbol & color) #
-#======================================================================#
+#========================================================================#
+## 5. PCA showing batches and treatment simultaneously (symbol & color) ##
+#========================================================================#
         #Don't remove just in case we need it. 
         #Note: Remember to change variables as outlined in parts 2 and 3
 
@@ -200,9 +200,9 @@ ggplot(mirna.PCA, aes(x = PCA1, y = PCA2)) +
 #                       aesthetics = "fill") +
 #   theme_light()
 
-#===========================#
-# 6. ANOVA (mrna and mirna) #
-#===========================#
+#=============================#
+## 6. ANOVA (mrna and mirna) ##
+#=============================#
 
 # Anova testing mRNA
 means_mrna<- data.frame(means= rowMeans(t(mrna2[,2:29]),na.rm = TRUE))
@@ -217,20 +217,9 @@ anova_Test_mirna<- aov(means_mirna[,1]~batch_mirna[,1])
 TukeyHSD(anova_Test_mirna, ordered = FALSE, conf.level = 0.95)
 #The anova shows that the mirna doesn't need correction as there is no significant batch variance
 
-#=============================#
-# 7. Batch effect correction. #
-#=============================#
-
-# assign numbers 1-4 to batches
-batch1 <- batch_number_mrna == "410978"
-batch_number_mrna$id[batch1[,1]] <- 1
-batch2 <- batch_number_mrna == "410979"
-batch_number_mrna$id[batch2[,1]] <- 2
-batch3 <- batch_number_mrna == "410980"
-batch_number_mrna$id[batch3[,1]] <- 3
-batch4 <- batch_number_mrna == "412287"
-batch_number_mrna$id[batch4[,1]] <- 4
-
+#==============================#
+## 7. Batch effect correction ##
+#==============================#
 # Perform correction
 mrna_corrected <- removeBatchEffect(mrna[, 2:29], batch = factor(batch_number_mrna$id)) 
 
@@ -243,9 +232,9 @@ boxplot(as.data.frame(mrna_corrected),main="Batch corrected")
 # boxplot(as.data.frame(mirna2[,2:29]),main="Original miRNA")
 # boxplot(as.data.frame(mirna_corrected),main="Batches miRNA corrected")
 
-#===========================#
-# 7. PCA for corrected data #
-#===========================#
+#=============================#
+## 8. PCA for corrected data ##
+#=============================#
 
 pcaRes_mrna_corrected <- pca(t(mrna_corrected),nPcs = 10)  # perform PCA
 PCA_mrna_corrected <- data.frame(c(pcaRes_mrna_corrected@scores[,1]),
