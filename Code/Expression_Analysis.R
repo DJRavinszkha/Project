@@ -3,74 +3,6 @@
 #	
 # Version: 1.0   															  
 # Date: 9-1-2020											             	  
-<<<<<<< Updated upstream
-# Author:  Jip de Kok, Stefan Meier, Ariadna Fosch & Ravin Schmidl 
-# Note: adapted from "Introduction to anamiR - 2019-05-09"
-# Ref: Wang T, Lu T, Lee C, Lai L, Tsai M, Chuang E (2015).
-#     "anamiR-an integrated analysis package of miRNA and mRNA expression." Manuscript submitted for publication.
-#     https://bioconductor.org/packages/release/bioc/vignettes/anamiR/inst/doc/IntroductionToanamiR.html#phenotype-data
-#=============================================================================#
-
-process <- function(mrna, mirna, pheno.mrna, pheno.mirna){
-  
-  #====================================#
-  ## Differential Expression Analysis ##
-  #====================================#
-  
-  mrna_se <- SummarizedExperiment::SummarizedExperiment(
-    assays = S4Vectors::SimpleList(counts=mrna),
-    colData = pheno.mrna)
-  
-  mirna_se <- SummarizedExperiment::SummarizedExperiment(
-    assays = S4Vectors::SimpleList(counts=mirna),
-    colData = pheno.mirna)
-  
-    mrna_d <- differExp_discrete(se = mrna_se,
-                               class = "ER", method = "wilcox.test",
-                               t_test.var = FALSE, log2 = FALSE,
-                               p_value.cutoff = 0.05,  logratio = 0.5
-    )
-    
-    
-    mirna_d <- differExp_discrete(se = mirna_se,
-                                  class = "ER", method = "t.test",
-                                  t_test.var = FALSE, log2 = FALSE,
-                                  p_value.cutoff = 0.05,  logratio = 0.5
-    )
-    
-    
-    # Perform manual t-test
-    index = rep(FALSE, length(colnames(mrna)))
-    for(i in 1:length(colnames(mrna))){
-      # if current column name is present in a list of all column names of cases:
-      if(colnames(mrna)[i] %in% pheno.mrna[pheno.mrna[,3]=="case",1]){
-        index[i] <- TRUE
-      }
-    }
-    
-    mrna.case <- mrna[,index]
-    mrna.control <- mrna[,!index]
-    t.results = t.test(mrna.case, mrna.control)
-    
-    
-    #====================================#
-    ## Correlation Analysis             ##
-    #====================================#
-    cor <- negative_cor(mrna_data = as.matrix(mrna_d), mirna_data = as.matrix(mirna_d),
-                        method = c("pearson"), cut.off = -0.5)
-    
- 
-    mirna_21 <- miR_converter(data = mirna_d, remove_old = TRUE,
-                              original_version = 17, latest_version = 21)
-    
-    
-}
-
-
-
-
-
-=======
 # Authors: Ariadna Fosch i Muntan??, ID: I6215203, Maastricht University       #
 #          Jip de Kok, ID: I6119367 , Maastricht University                   #
 #          Ravin Schmidl, ID: I6125866, Maastricht University                 #
@@ -85,7 +17,6 @@ library(edgeR)
 #====================================#
 ## Differential Expression Analysis ##
 #====================================#
->>>>>>> Stashed changes
 
 ##Link from the PCA.R to here to identify whether we need batch corrections
 ## Exploratroy PCA plots
@@ -110,10 +41,9 @@ fit.eb <- function(data, design, cont){
 #=========================================================#
 ##Function to identify top differentially expressed genes##
 #=========================================================#
-#fit.eb, p.value = 0.05, number = nrow(data), adjust = "BH"
-top.genes <- function(fit.eb, p.value, number, adjust){
-  top_genes <- topTable(fit.eb, p.value, number, adjust) 
-  return(top_genes)
+top.expressed <- function(fit.eb, p.value, number, adjust){
+  top_expressed <- topTable(fit.eb, p.value, number, adjust) 
+  return(top_expressed)
 }
 
 #==========================#
@@ -147,15 +77,13 @@ q.value <- function(fit.eb){
 ## Initialise design matrices, colnames and contrast matrix ##
 #============================================================#
 
-#======     mRNA      ======#
+#======     mRNA      ======#       Need to check design matrices, can use dataframe LABELS for initialisation
 print("mRNA Design Matrix")
-design_matrix_mrna <- model.matrix(~ 0 + factor(c(1,1,1,1,1,1,1,1,1,
-                                                  2,2,2,2,2,2,2,2,2,2,
-                                                  3,3,3,3,3,3,3,3,3)))
+design_matrix_mrna <- model.matrix(~ 0 + factor(c("NEED", "TO", "CREATE")))
 
 #======     miRNA      ======#
 print("miRNA Design Matrix")
-design_matrix_mirna <- model.matrix(~ 0 + factor(sampleGroups$id))
+design_matrix_mirna <- model.matrix(~ 0 + factor(c("NEED", "TO", "CREATE")))
 
 #======     other      ======#
 colnames(design_matrix_mrna) <- c("cholestasis", "drained", "control")
@@ -171,7 +99,7 @@ cont_matrix <- makeContrasts (drained_v_control = drained - control,
 print("Linear model of mRNA")
 mrna.fit <- fit.eb(mrna, design_matrix_mrna, cont_matrix)
 print("Top DE of mRNA")
-mrna.topGenes <- top.genes(mrna.fit, 0.05, nrow(mrna), "BH")
+mrna.topExpressed <- top.expressed(mrna.fit, 0.05, nrow(mrna), "BH")
 print("mRNA volcano plot")
 mrna.volcano <- volcano(mrna.fit)
 print("mRNA q-values")
@@ -184,7 +112,7 @@ mrna.q <- q.value(mrna.fit)
 print("Linear model of miRNA")
 mirna.fit <- fit.eb(mirna, design_matrix_mirna, cont_matrix)
 print("Top DE of miRNA")
-mirna.topGenes <- top.genes(mirna.fit, 0.05, nrow(mirna), "BH")
+mirna.topExpressed <- top.expressed(mirna.fit, 0.05, nrow(mirna), "BH")
 print("miRNA volcano plot")
 mirna.volcano <- volcano(mirna.fit)
 print("miRNA q-values")
