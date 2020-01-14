@@ -33,11 +33,12 @@ index:
 
 5) Enrichment.R
      - Notes: 
-       a) https://www.biostars.org/p/222081/
-       b) https://www.biostars.org/p/277303/
-       c) https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-016-0971-3 (machine learning :O)
-       d) https://bioconductor.org/packages/release/bioc/vignettes/topGO/inst/doc/topGO.pdf (topGO documentation)
-       e) https://bioconductor.org/packages/devel/bioc/vignettes/GOexpress/inst/doc/GOexpress-UsersGuide.pdf (GOexpress documentation)
+      - https://www.biostars.org/p/222081/
+      - https://www.biostars.org/p/277303/
+      - https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-016-0971-3 (machine learning :O)
+      - https://bioconductor.org/packages/release/bioc/vignettes/topGO/inst/doc/topGO.pdf (topGO documentation)
+      - https://bioconductor.org/packages/devel/bioc/vignettes/GOexpress/inst/doc/GOexpress-UsersGuide.pdf (GOexpress documentation)
+      - http://geneontology.org/docs/go-enrichment-analysis/
        
 6) Network.R
      - hmmmmmmmm
