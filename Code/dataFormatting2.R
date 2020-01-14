@@ -81,11 +81,6 @@ format <- function(){
   index_control <- sampleGroups == 'control'
   sampleGroups$id[index_control[,1]] <- 3
   
-  index_batch1 <- mrna == "410978"
-  batch[,1] <- 1
-  index_batch1 <- mrna == "410978"
-  batch[,1] <- 1
-  
   #=============================#
   # Create phenotype data       #
   #=============================#
