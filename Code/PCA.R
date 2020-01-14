@@ -1,8 +1,8 @@
 #=============================================================================#
-# Project Period, Liver cholestasis data analysis         							      #					  
-#	Data Formatting                                                             #
-# Version: 1.0   															                                #
-# Date: 9-1-2020											             	                          #
+# Project Period, Liver cholestasis data analysis         		      #					  
+#	Data Formatting                                                       #
+# Version: 1.0   							      #							                                #
+# Date: 9-1-2020							      #			             	                          #
 # Authors: Ariadna Fosch i Muntané, ID: I6215203, Maastricht University       #
 #          Jip de Kok, ID: I6119367 , Maastricht University                   #
 #          Ravin Schmidl, ID: I6125866, Maastricht University                 #
@@ -11,6 +11,9 @@
 #=========================================#
 ##         Install libraries             ##
 #=========================================#
+ ## !!!!!!! ## 
+#install.packages("cowplot") ## !!!!!! ## <<<<<------ need to install
+library(cowplot)
 library(limma)
 library(pcaMethods)
 library(gplots)
