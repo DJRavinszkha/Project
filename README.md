@@ -25,6 +25,7 @@ index:
      - And finally identify significantly differentially expression mRNA and miRNA
      - Future:
       - Ideally should return significantly differentially expressed mRNA and miRNA to allow miRNA_Target_Analysis.R,     Network.R and Enrichment.R to use these values
+      - Perhaps could make heatplots of highest differentially expressed mRNA and a dendrogram plot of highest differentially expressed miRNA
        
 4) miRNA_Target_Analysis.R
      - Calculates pearson correlations between mRNA and miRNA expression
