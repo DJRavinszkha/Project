@@ -39,5 +39,11 @@ miRNA_correlate <- function(mirna, mrna){
       setTxtProgressBar(progress, step)
     }
   }
+  
+  # Correct for multiple testing
+  trial <- corMatrix[1:500,]
+  trial$"p-adjust" <- p.adjust(trial["p-value"], method = "BH")
+  
+  
   return(corMatrix)
 }
