@@ -3,17 +3,25 @@
 #	
 # Version: 1.0   															  
 # Date: 9-1-2020											             	  
+<<<<<<< Updated upstream
 # Author:  Jip de Kok, Stefan Meier, Ariadna Fosch & Ravin Schmidl 
 # Note: adapted from "Introduction to anamiR - 2019-05-09"
 # Ref: Wang T, Lu T, Lee C, Lai L, Tsai M, Chuang E (2015).
 #     "anamiR-an integrated analysis package of miRNA and mRNA expression." Manuscript submitted for publication.
 #     https://bioconductor.org/packages/release/bioc/vignettes/anamiR/inst/doc/IntroductionToanamiR.html#phenotype-data
+=======
+# Authors: Ariadna Fosch i Muntané, ID: I6215203, Maastricht University       #
+#          Jip de Kok, ID: I6119367 , Maastricht University                   #
+#          Ravin Schmidl, ID: I6125866, Maastricht University                 #
+#          Stefan Meier, ID: I6114194 , Maastricht University                 #                           
+>>>>>>> Stashed changes
 #=============================================================================#
 
 #===================#
 ## Data Formatting ##
 #===================#
 
+<<<<<<< Updated upstream
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager", "limma")
 
@@ -21,6 +29,12 @@ BiocManager::install("anamiR")
 
 
 library(anamiR)
+=======
+setRepositories(FALSE, 1:9)
+
+
+library(rstudioapi)
+>>>>>>> Stashed changes
 library(limma)
 library(rstudioapi)
 
@@ -272,5 +286,22 @@ format <- function(){
   
   return(mrna, mirna, labels, pheno.mrna, pheno.mirna, key)
 }
+<<<<<<< Updated upstream
+=======
+colnames(mirna) <- columns
+
+#=== Here we initialise the sample grouping ===
+sampleGroups <- read.delim("../Data/SampleGroups.csv", sep = ',', header = TRUE, colClasses = 'character')
+sampleGroups <- sampleGroups[,6:7]
+
+index_cholestatic <- sampleGroups == 'cholestatic'
+sampleGroups$id[index_cholestatic[,1]] <- 1
+index_drained <- sampleGroups == 'drained'
+sampleGroups$id[index_drained[,1]] <- 2
+index_control <- sampleGroups == 'control'
+sampleGroups$id[index_control[,1]] <- 3
+
+
+>>>>>>> Stashed changes
 
 
