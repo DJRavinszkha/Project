@@ -1,12 +1,12 @@
 #=============================================================================#
-# Project Period, Liver cholestasis data analysis         												  
-#	
-# Version: 1.0   															  
-# Date: 9-1-2020											             	  
+# Project Period, Liver cholestasis data analysis         							      #					  
+#	Expression Analysis                                                         #
+# Version: 1.0   															                                #
+# Date: 9-1-2020											             	                          #
 # Authors: Ariadna Fosch i Muntan??, ID: I6215203, Maastricht University       #
 #          Jip de Kok, ID: I6119367 , Maastricht University                   #
 #          Ravin Schmidl, ID: I6125866, Maastricht University                 #
-#          Stefan Meier, ID: I6114194 , Maastricht University                 #                              
+#          Stefan Meier, ID: I6114194 , Maastricht University                 #
 #=============================================================================#
 
 BiocManager::install("qvalue")

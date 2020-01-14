@@ -1,16 +1,12 @@
 #=============================================================================#
-# Project Period, Liver cholestasis data analysis         												  
-#	
-# Version: 1.0   															  
-# Date: 9-1-2020											             	  
+# Project Period, Liver cholestasis data analysis         							      #					  
+#	Data Formatting                                                             #
+# Version: 1.0   															                                #
+# Date: 9-1-2020											             	                          #
 # Authors: Ariadna Fosch i Muntané, ID: I6215203, Maastricht University       #
 #          Jip de Kok, ID: I6119367 , Maastricht University                   #
 #          Ravin Schmidl, ID: I6125866, Maastricht University                 #
 #          Stefan Meier, ID: I6114194 , Maastricht University                 #
-# Note: adapted from "Introduction to anamiR - 2019-05-09"
-# Ref: Wang T, Lu T, Lee C, Lai L, Tsai M, Chuang E (2015).
-#     "anamiR-an integrated analysis package of miRNA and mRNA expression." Manuscript submitted for publication.
-#     https://bioconductor.org/packages/release/bioc/vignettes/anamiR/inst/doc/IntroductionToanamiR.html#phenotype-data
 #=============================================================================#
 
 #===================#
