@@ -19,7 +19,7 @@ library(ggplot2)
 #=========================================#
 ##           Initialise Data             ##
 #=========================================#
-Data <- format()
+Data <- format() #Remember to run dataFormatting.R first before initialising data
 mrna <- data.frame(Data[1]) #mRNA expression data (contains entrez ID as index)
 mirna <- data.frame(Data[2]) #miRNA expression data (contains miRNA name as index)
 labels <- data.frame(Data[3]) #batch and treatment id/labels for samples
