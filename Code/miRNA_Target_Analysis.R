@@ -15,12 +15,8 @@ if (!requireNamespace("miRBaseConverter", quietly = TRUE))
   BiocManager::install("miRBaseConverter")
 
 library(miRBaseConverter)
+library(jsonlite)
 
-#==== miRNA version conversion ===#
-miRNA_names <- row.names(mirna) #                                                 Store miRNA names
-version = checkMiRNAVersion(row.names(mirna), verbose = FALSE) #                   Check miRNA name version
-miRNA_names <- miRNA_NameToAccession(miRNA_names, version = version) #            Include Accession numbers
-miRNA_names_v22 <- miRNA_AccessionToName(miRNA_names[,2],targetVersion = "v22")#  Convert to version 22
 
 #========================================================================================================#
 # This function calculates pearson correlations between micro- and messenger RNA expression              #
@@ -62,23 +58,44 @@ miRNA_correlate <- function(mirna, mrna){
   return(corMatrix)
 }
 
+
 miRNA_target_query <- function(mirna, mrna){
+  #==== miRNA version conversion ===#
+  miRNA_names <- row.names(mirna)                                       # Store miRNA names
+  version = checkMiRNAVersion(row.names(mirna), verbose = TRUE)         # Check miRNA name version
+  miRNA_names <- miRNA_NameToAccession(miRNA_names, version = version)  # Include Accession numbers
+  miRNA_names_v18 <- miRNA_AccessionToName(miRNA_names[,2],
+                                           targetVersion = "v18")       # Convert to version 18
   
+  #=== miRNA targer prediction - query ===#
   prefix <- "https://app1.bioinformatics.mdanderson.org/tarhub/_design/basic/_view/"
   link_temaplate <- paste(prefix, 'by_matureMIRcount?startkey=[%s,%s]&endkey=[%s,{}]',  sep = "")
   
-  name = dQuote("hsa-mir-212") 
-  name <- "%22hsa-mir-29a%22"
-  minSources = 3
-  miRNA_link <- sprintf(link_temaplate, name, minSources, name)
+  minSources = 1 # Set minimum number of sources
+  mirna_targets <- list() # Initialise the mina_targets matrix
   
-  targets <- fromJSON(miRNA_link)
-  mirna_targets <- matrix(nrow = nrow(mirna), ncol = 1)
+  list = rep( list(list(rep(0, 3))), nrow(mirna) ) 
+  target = list()
   
-  for (i in 1:nrow(mirna)){
-    name = tolower(paste("%22", row.names(mirna)[i], "%22", sep = ""))
-    miRNA_link <- sprintf(link_temaplate, name, minSources, name)
-    mirna_targets[i] <- fromJSON(miRNA_link)
+  # Initiate progress bar
+  progress <- txtProgressBar(min = 0, max = length(miRNA_names), initial = 0)
+  
+  step = 0
+  nTargets = 0
+  for (i in 1:length(miRNA_names)){
+    step = step + 1
+    name = paste("%22", miRNA_names[i], "%22", sep = "")          # Set name in correct URL format
+    miRNA_link <- sprintf(link_temaplate, name, minSources, name) # Create URL link to miRNA targets
+    target <- try(fromJSON(miRNA_link))                           # Query the miRNA - try returns error for server errors
+    #names(target)[3] <- miRNA_names[i]                           # Set list item name to miRNA name                    
+    mirna_targets <- append(mirna_targets, list(as.matrix(target$rows)))# Add the miRNA targets to one long list of targets
+    nTargets <- nTargets +  nrow(as.matrix(target$rows))          # Keep track of the total number of targets
+    
+    # substr(unlist(columns[2:29]), 1, 6)
+    
+    # Update progress bar
+    setTxtProgressBar(progress, step)
   }
 }
-
+colnames(mirna_targets) <- c("miRNA", "mRNA", "sources")
+strsplit(target$rows[1,1], ":")
