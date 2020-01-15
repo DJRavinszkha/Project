@@ -17,10 +17,10 @@
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager", "limma")
 
-BiocManager::install("anamiR")
+# BiocManager::install("anamiR")
 
 
-library(anamiR)
+#library(anamiR)
 library(limma)
 library(rstudioapi)
 
@@ -269,6 +269,11 @@ format <- function(){
   # pheno.mrna <- pheno.mrna[,2:3]
   # pheno.mirna <- pheno.mrna # pheno.mirna is identical to pheno.mrna (for clarity they both exist)
   # 
+  
+  #=============================================#
+  # Now we change the miRNA name version        #
+  #=============================================#
+  
   
   return(mrna, mirna, labels, pheno.mrna, pheno.mirna, key)
 }

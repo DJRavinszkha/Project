@@ -30,13 +30,11 @@ process <- function(mrna, mirna, pheno.mrna, pheno.mirna){
                                p_value.cutoff = 0.05,  logratio = 0.5
     )
     
-    
     mirna_d <- differExp_discrete(se = mirna_se,
                                   class = "ER", method = "t.test",
                                   t_test.var = FALSE, log2 = FALSE,
                                   p_value.cutoff = 0.05,  logratio = 0.5
     )
-    
     
     # Perform manual t-test
     index = rep(FALSE, length(colnames(mrna)))
@@ -51,7 +49,6 @@ process <- function(mrna, mirna, pheno.mrna, pheno.mirna){
     mrna.control <- mrna[,!index]
     t.results = t.test(mrna.case, mrna.control)
     
-    
     #====================================#
     ## Correlation Analysis             ##
     #====================================#
@@ -61,7 +58,6 @@ process <- function(mrna, mirna, pheno.mrna, pheno.mirna){
  
     mirna_21 <- miR_converter(data = mirna_d, remove_old = TRUE,
                               original_version = 17, latest_version = 21)
-    
     
 }
 

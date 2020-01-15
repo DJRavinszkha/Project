@@ -6,6 +6,21 @@
 # Author:  Jip de Kok, Stefan Meier, Ariadna Fosch & Ravin Schmidl 
 #=============================================================================#
 
+#=== Install and load required packages ===#
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+if (!requireNamespace("miRBaseConverter", quietly = TRUE))
+  BiocManager::install("miRBaseConverter")
+
+library(miRBaseConverter)
+
+#==== miRNA version conversion ===#
+miRNA_names <- row.names(mirna) #                                                 Store miRNA names
+version = checkMiRNAVersion(row.names(mirna), verbose = FALSE) #                   Check miRNA name version
+miRNA_names <- miRNA_NameToAccession(miRNA_names, version = version) #            Include Accession numbers
+miRNA_names_v22 <- miRNA_AccessionToName(miRNA_names[,2],targetVersion = "v22")#  Convert to version 22
 
 #========================================================================================================#
 # This function calculates pearson correlations between micro- and messenger RNA expression              #
@@ -40,10 +55,30 @@ miRNA_correlate <- function(mirna, mrna){
     }
   }
   
-  # Correct for multiple testing
-  trial <- corMatrix[1:500,]
-  trial$"p-adjust" <- p.adjust(trial["p-value"], method = "BH")
+  # Correct for multiple testing (using the FDR method of Benjamini Hochberg)
+  corMatrix$"p.adjust" <- p.adjust(corMatrix$p.value, method = "BH")
   
   
   return(corMatrix)
 }
+
+miRNA_target_query <- function(mirna, mrna){
+  
+  prefix <- "https://app1.bioinformatics.mdanderson.org/tarhub/_design/basic/_view/"
+  link_temaplate <- paste(prefix, 'by_matureMIRcount?startkey=[%s,%s]&endkey=[%s,{}]',  sep = "")
+  
+  name = dQuote("hsa-mir-212") 
+  name <- "%22hsa-mir-29a%22"
+  minSources = 3
+  miRNA_link <- sprintf(link_temaplate, name, minSources, name)
+  
+  targets <- fromJSON(miRNA_link)
+  mirna_targets <- matrix(nrow = nrow(mirna), ncol = 1)
+  
+  for (i in 1:nrow(mirna)){
+    name = tolower(paste("%22", row.names(mirna)[i], "%22", sep = ""))
+    miRNA_link <- sprintf(link_temaplate, name, minSources, name)
+    mirna_targets[i] <- fromJSON(miRNA_link)
+  }
+}
+
