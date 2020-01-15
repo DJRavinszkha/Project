@@ -87,13 +87,13 @@ PCA <- function(data,
         # - please refer to lines 16 and 58 in PCA_longversin.R
     # or we prescribe it a value (as in PCA for corrected mRNA)
         # - pleasw refer to line 101 in PCA_longversin.R
-    x = treat
+    Treatment = treat
   } else{
-    x = data.PCA$treat
+    Treatment = data.PCA$treat
   }
   ##==== Colouring by treatment ====##
   plot1 <- ggplot(data.PCA, aes(x = PCA1, y = PCA2)) +
-              geom_point(aes(colour = x)) +
+              geom_point(aes(colour = Treatment)) +
               scale_colour_manual(values = c("#04179b", "#da9e00", "#198c19"),
                         aesthetics = "fill") + theme_light() + 
               ggtitle(title1)
