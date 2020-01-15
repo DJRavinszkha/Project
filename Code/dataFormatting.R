@@ -23,19 +23,19 @@ format <- function(){
   current_path <- getActiveDocumentContext()$path 
   setwd(dirname(current_path ))
   mrna = read.delim('../Data/GeneExpressionNormalized.txt', check.names = FALSE) #Load expression data
-  mirna = read.delim('../Data/miRNAexpression.txt', check.names = FALSE) #Load miRNA expression data
-  colnames(mrna)[10] <- "FGS_10_410978_2_3_H" #Change the name of one variable due to error
+  mirna = read.delim('../Data/miRNAexpression.txt', check.names = FALSE)        #Load miRNA expression data
+  colnames(mrna)[10] <- "FGS_10_410978_2_3_H"                                   #Change the name of one variable due to error
   
   #Initialise a dataframe called labels, containing all:
-      # file/batch names and sample names 
-      # batch numbers and an int id attached to it
-      # treatments and an int id attached to it
+  # file/batch names and sample names 
+  # batch numbers and an int id attached to it
+  # treatments and an int id attached to it
   labels = read.delim("../Data/colNames.csv", sep = ',', header = FALSE, colClasses = 'character')
   
   labels$V4 <- colnames(mrna[3:30])
   key <- mrna[,1:2] # Key for maintaining gene symbol and entrez gene ID
   
-  #labels$V1 <- colnames(mirna[2:29]) #maintaining names for mirna filenames REMOOOVE!!
+  labels$V1 <- colnames(mirna[2:29]) #maintaining names for mirna filenames
   
   #Here we initialise batch number id's of mRNA's
   labels$V5 <- substr(unlist(labels$V4), 8, 13) 
@@ -60,8 +60,8 @@ format <- function(){
   sampleGroups <- sampleGroups[,6:7]
   
   labels$treatment.id[labels$treatment == "cholestatic"] <- 1 #set id 1 to cholestatic treatment
-  labels$treatment.id[labels$treatment == "drained"] <- 2 #set id 2 to drained treatment
-  labels$treatment.id[labels$treatment == "control"] <- 3 #set id 3 to control treatment
+  labels$treatment.id[labels$treatment == "drained"] <- 2     #set id 2 to drained treatment
+  labels$treatment.id[labels$treatment == "control"] <- 3     #set id 3 to control treatment
   
   # Column names are different for miRNA and mRNA datasets, but are conserved with sample names in SampleGroups.xlsx
   #IE FGS_01 is the name of sample 1; 
@@ -69,10 +69,10 @@ format <- function(){
   #and mRNA sample is FGS_01_410978_1_1
   
   #=== Here we change the columns names of mrna (mRNA samples) to the sample names ===
-  mrna = subset(mrna, select = -2) # Remove gene symbol column
+  mrna = subset(mrna, select = -2)                     # Remove gene symbol column
   columns = colnames(mrna)
   columns[2:29] <- substr(unlist(columns[2:29]), 1, 6) #Only keep first 6 characters of column names
-  colnames(mrna) <- columns # Assign this to the actual column names
+  colnames(mrna) <- columns                            # Assign this to the actual column names
   
   #=== Here we change the columns names of mirna (miRNA samples) to the sample names ===
   columns = colnames(mirna)
@@ -92,11 +92,11 @@ format <- function(){
   
   #mrna
   rownames(mrna) <- mrna[,1] # Set entrezid as index for mrna; can use key to find gene symbols based on index
-  mrna <- mrna[,2:29] #Set mrna to only contain expression values
+  mrna <- mrna[,2:29]        # Set mrna to only contain expression values
   
   #mirna
   rownames(mirna) <- mirna[,1] # Set mirna names as index for mirna
-  mirna <- mirna[,2:29] #set mirna to only contain expression values
+  mirna <- mirna[,2:29]        # Set mirna to only contain expression values
   
   #=============================#
   ##   Create phenotype data   ##     # Do we need this?
@@ -161,9 +161,8 @@ format <- function(){
   # pheno.mrna <- pheno.mrna[!(pheno.mrna[,2]=="drained"),]
   # pheno.mirna <- pheno.mirna[!(pheno.mirna[,2]=="drained"),]
   
-
+  
   
   
   return(list(mrna, mirna, labels, key))
 }
-

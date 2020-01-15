@@ -277,13 +277,19 @@ for (i in 1:ncol(fit_contrast)){
 # STEFAN'S CODE : FOR TESTING PURPOSES
 
 sampleGroups <- data.frame(treatment = labels$treatment, treatment.id = labels$treatment.id, sampleName = labels$sample.name)
+
+# Get batch order mrna (copied from pca)
+mrna.batches <- data.frame(batch = labels$mRNA.batch, batch.id = labels$mRNA.batch.id, file = labels$mRNA.file)
+
+# Get batch order mirna (copied from pca)
+mirna.batches <- data.frame(batch = labels$miRNA.batch, batch.id = labels$miRNA.batch.id, file = labels$mRNA.file)
 #========#
 design_matrix_mrna <- matrix(nrow = (ncol(mrna)), ncol = 1)
 colnames(design_matrix_mrna) <- "sampleName"
 design_matrix_mrna[,1] <- colnames(mrna)
 design_matrix_mrna <- merge(design_matrix_mrna, sampleGroups, by = "sampleName", sort = FALSE)
-design_matrix_mrna <- model.matrix(~ 0 + factor(design_matrix_mrna[,3]))
-colnames(design_matrix_mrna) <- c("cholestasis", "drained", "control")
+design_matrix_mrna <- model.matrix(~ 0 + factor(design_matrix_mrna[,3]) + factor(mrna.batches$batch.id))
+colnames(design_matrix_mrna) <- c("cholestasis", "drained", "control","batch")
 
 cont_matrix <- makeContrasts (drained_v_control = drained - control,
                               cholestasis_v_control = cholestasis - control,
@@ -401,4 +407,4 @@ q_log_deg_mrna_chvco<- cbind(logFC= deg_mrna_cholestasis_v_control$cholestasis_v
 deg_mrna_cholestasis_v_drained<- top_genes[match(rownames(adj_q_mrna_cholestasis_v_drained),rownames(top_genes)),]
 q_log_deg_mrna_chvd<- cbind(logFC= deg_mrna_cholestasis_v_drained$cholestasis_v_drained,adj_q_mrna_cholestasis_v_drained)
 
-
+## 

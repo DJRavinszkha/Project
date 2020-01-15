@@ -52,7 +52,7 @@ mirna.treatmentOrder <- mirna.treatmentOrder[order(mirna.treatmentOrder$treatmen
 mrna.batches <- data.frame(batch = labels$mRNA.batch, batch.id = labels$mRNA.batch.id, file = labels$mRNA.file)
 
 # Get batch order mirna
-mirna.batches <- data.frame(batch = labels$miRNA.batch, batch.id = labels$miRNA.batch.id, file = labels$mRNA.file)
+mirna.batches <- data.frame(batch = labels$miRNA.batch, batch.id = labels$miRNA.batch.id, file = labels$mRNA.file, sort= FALSE)
 
 #=========================#
 ##    2. PCA Function    ## 
