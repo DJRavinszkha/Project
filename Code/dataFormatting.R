@@ -35,7 +35,7 @@ format <- function(){
   labels$V4 <- colnames(mrna[3:30])
   key <- mrna[,1:2] # Key for maintaining gene symbol and entrez gene ID
   
-  labels$V1 <- colnames(mirna[2:29]) #maintaining names for mirna filenames
+  #labels$V1 <- colnames(mirna[2:29]) #maintaining names for mirna filenames REMOOOVE!!
   
   #Here we initialise batch number id's of mRNA's
   labels$V5 <- substr(unlist(labels$V4), 8, 13) 
