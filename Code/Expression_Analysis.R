@@ -18,10 +18,16 @@ BiocManager::install("qvalue")
 
 library(qvalue)
 library(limma)
-library(edgeR)
+library(qvalue)
 #====================================#
 ## Differential Expression Analysis ##
 #====================================#
+
+Data <- format() #Remember to run dataFormatting.R first before initialising data
+mrna <- data.frame(Data[1]) #mRNA expression data (contains entrez ID as index)
+mirna <- data.frame(Data[2]) #miRNA expression data (contains miRNA name as index)
+labels <- data.frame(Data[3]) #batch and treatment id/labels for samples
+key <- data.frame(Data[4]) #entrezID to genesymbol key
 
 ##Link from the PCA.R to here to identify whether we need batch corrections
 ## Exploratroy PCA plots
@@ -33,6 +39,7 @@ library(edgeR)
 #====================================#
 ##   Function to initialise model   ##    #Note: stop using limma and convert to edgeR for batch correction
 #====================================#
+
 fit.eb <- function(data, design, cont){
   fit <- lmFit(data, design) #            Note: glmFit
   fit.con <- contrasts.fit(fit, cont) #         ignore
@@ -205,7 +212,6 @@ colnames(mirna_d) <- c("log-ratio", "P-Value", "P-adjust", "mean_case", "mean_co
 
 #======== still fucking with this so don't mind this
 
-
 mrna_batch_410978 <- mrna[, c(2, 5, 3, 4, 7, 6, 8, 9), drop=F]
 mrna_batch_410979 <- mrna[, c(12, 15, 17, 10, 13, 16, 11, 14), drop=F]
 mrna_batch_410980 <- mrna[, c(20, 23, 18, 21, 24, 19, 22, 25), drop=F]
@@ -234,11 +240,165 @@ controls_mrna<-mrna[match(controls$SampleName, colnames(mrna))]
 control_vs_chole<- pairwise.t.test(controls_mrna,cholestatic_mrna, p.adjust.method = "BH") #ask the group about how to make the comparison between the different groups
 
 
+#####################################################################
+
+#========#
+design_matrix_mrna <- matrix(nrow = (ncol(mrna) -1), ncol = 1)
+colnames(design_matrix_mrna) <- "SampleName"
+design_matrix_mrna[,1] <- colnames(mrna[,2:length(mrna)])
+design_matrix_mrna <- merge(design_matrix_mrna, sampleGroups, by =  "SampleName", sort = FALSE)
+design_matrix_mrna <- model.matrix(~ 0 + factor(design_matrix_mrna[,3]))
+colnames(design_matrix_mrna) <- c("cholestasis", "drained", "control")
+
+cont_matrix <- makeContrasts (drained_v_control = drained - control,
+                              cholestasis_v_control = cholestasis - control,
+                              cholestasis_v_drained = cholestasis - drained,
+                              levels = design_matrix_mrna)
+
+fit <- lmFit(mrna[, 2:29], design_matrix_mrna)
+
+fit_contrast <- contrasts.fit(fit, cont_matrix)
+
+fit_contrast <- eBayes(fit_contrast)
+
+results <- decideTests(fit_contrast)
+
+summary(results)
+
+top_genes <- topTable (fit_contrast, p.value = "0.05", number = nrow(mrna), adjust = "BH")
+
+for (i in 1:ncol(fit_contrast)){
+  volcanoplot(fit_contrast[,i], main= colnames(fit_contrast)[i], col=ifelse(fit_contrast[,i]$p.value > 0.05,"red","black"))
+  abline(-log10(0.05),0)
+  abline(v=log2(2))
+  abline(v=-log2(2))
+}
+#=======================================================================#
+# STEFAN'S CODE : FOR TESTING PURPOSES
+
+sampleGroups <- data.frame(treatment = labels$treatment, treatment.id = labels$treatment.id, sampleName = labels$sample.name)
+#========#
+design_matrix_mrna <- matrix(nrow = (ncol(mrna)), ncol = 1)
+colnames(design_matrix_mrna) <- "sampleName"
+design_matrix_mrna[,1] <- colnames(mrna)
+design_matrix_mrna <- merge(design_matrix_mrna, sampleGroups, by = "sampleName", sort = FALSE)
+design_matrix_mrna <- model.matrix(~ 0 + factor(design_matrix_mrna[,3]))
+colnames(design_matrix_mrna) <- c("cholestasis", "drained", "control")
+
+cont_matrix <- makeContrasts (drained_v_control = drained - control,
+                              cholestasis_v_control = cholestasis - control,
+                              cholestasis_v_drained = cholestasis - drained,
+                              levels = design_matrix_mrna)
+
+fit <- lmFit(mrna, design_matrix_mrna)
+
+fit_contrast <- contrasts.fit(fit, cont_matrix)
+
+fit_contrast <- eBayes(fit_contrast)
+
+results <- decideTests(fit_contrast)
+
+summary(results)
+
+top_genes <- topTable (fit_contrast, number = nrow(mrna), adjust = "BH")
+
+for (i in 1:ncol(fit_contrast)){
+  volcanoplot(fit_contrast[,i], main= colnames(fit_contrast)[i], col=ifelse(fit_contrast[,i]$p.value > 0.05,"red","black"))
+  abline(-log10(0.05),0)
+  abline(v=log2(2))
+  abline(v=-log2(2))
+}
 
 
+#=======================================================================#
+design_matrix_mirna <- matrix(nrow = (ncol(mirna)), ncol = 1)
+colnames(design_matrix_mirna) <- "sampleName"
+design_matrix_mirna[,1] <- colnames(mirna)
+design_matrix_mirna <- merge(design_matrix_mirna, sampleGroups, by = "sampleName", sort = FALSE)
+design_matrix_mirna <- model.matrix(~ 0 + factor(design_matrix_mirna[,3]))
+colnames(design_matrix_mirna) <- c("cholestasis", "drained", "control")
+
+cont_matrix <- makeContrasts (drained_v_control = drained - control,
+                              cholestasis_v_control = cholestasis - control,
+                              cholestasis_v_drained = cholestasis - drained,
+                              levels = design_matrix_mirna)
+
+#omitmirna <- na.omit(mirna) #Do we need impute or omit or mean? 
+
+fit2 <- lmFit(mirna, design_matrix_mirna)
+
+fit_contrast2 <- contrasts.fit(fit2, cont_matrix)
+
+fit_contrast2 <- eBayes(fit_contrast2)
+
+results2 <- decideTests(fit_contrast2)
+
+summary(results2)
+
+top_genes2 <- topTable (fit_contrast2, number = nrow(mirna), adjust = "BH") 
+#cut top genes list based on adj. sign. threshold. 
 
 
+for (i in 1:ncol(fit_contrast2)){
+  volcanoplot(fit_contrast2[,i], main= colnames(fit_contrast2)[i], col=ifelse(fit_contrast2[,i]$p.value > 0.05,"red","black"))
+  abline(-log10(0.05),0)
+  abline(v=log2(2))
+  abline(v=-log2(2))
+}
 
 
+#=========================================#
+# The qvalue function is used to calculate the adjusted pvalues of all the different comparisons#
+#==========================================#
+# this is pairwise testing (I believe)
+
+# Adjust all p values using qvalue() for the mRNA set
+
+mrna_drained_v_control_pvalue <- qvalue(fit_contrast$p.value[,1])
+mrna_cholestasis_v_control_pvalue <- qvalue(fit_contrast$p.value[,2])
+mrna_cholestasis_v_drained_pvalue <- qvalue(fit_contrast$p.value[,3])
+
+# Adjust all p values using qvalue() for the miRNA set
+mirna_drained_v_control_pvalue <- qvalue(fit_contrast2$p.value[,1])
+mirna_cholestasis_v_control_pvalue <- qvalue(fit_contrast2$p.value[,2])
+mirna_cholestasis_v_drained_pvalue <- qvalue(fit_contrast2$p.value[,3])
+
+adj_q_mrna_drained_v_control <- data.frame(q_val= mrna_drained_v_control_pvalue$qvalues[which(mrna_drained_v_control_pvalue$qvalues <= 0.05)])
+adj_q_mrna_cholestasis_v_control <- data.frame(q_val= mrna_cholestasis_v_control_pvalue$qvalues[which(mrna_cholestasis_v_control_pvalue$qvalues <= 0.05)])
+adj_q_mrna_cholestasis_v_drained <- data.frame(q_val= mrna_cholestasis_v_drained_pvalue$qvalues[which(mrna_cholestasis_v_drained_pvalue$qvalues <= 0.05)])
+
+adj_q_mirna_drained_v_control <- data.frame(q_val= mirna_drained_v_control_pvalue$qvalues[which(mirna_drained_v_control_pvalue$qvalues <= 0.05)])
+adj_q_mirna_cholestasis_v_control <- data.frame(q_val= mirna_cholestasis_v_control_pvalue$qvalues[which(mirna_cholestasis_v_control_pvalue$qvalues <= 0.05)])
+adj_q_mirna_cholestasis_v_drained <- data.frame(q_val= mirna_cholestasis_v_drained_pvalue$qvalues[which(mirna_cholestasis_v_drained_pvalue$qvalues <= 0.05)])
+
+# Differentially expressed genes on top genes. 
+
+deg_mirna_cholestasis_v_control <- match(rownames(adj_q_mirna_cholestasis_v_control),rownames(top_genes2))
+deg_mirna_cholestasis_v_drained <- match(rownames(adj_q_mirna_cholestasis_v_drained),rownames(top_genes2))
+
+deg_mrna_drained_v_control <- match(rownames(adj_q_mrna_drained_v_control),rownames(top_genes))
+deg_mrna_cholestasis_v_control <- match(rownames(adj_q_mrna_cholestasis_v_control),rownames(top_genes))
+deg_mrna_cholestasis_v_drained <- match(rownames(adj_q_mrna_cholestasis_v_drained),rownames(top_genes))
+
+#miRNA diff exp genes
+deg_mirna_drained_v_control<- top_genes2[match(rownames(adj_q_mirna_drained_v_control),rownames(top_genes2)),]
+q_log_deg_mirna_dvc<- cbind(logFC= deg_mirna_drained_v_control$drained_v_control,adj_q_mirna_drained_v_control)
+
+deg_mirna_cholestasis_v_control<- top_genes2[match(rownames(adj_q_mirna_cholestasis_v_control),rownames(top_genes2)),]
+q_log_deg_mirna_cvc<- cbind(logFC= deg_mirna_cholestasis_v_control$cholestasis_v_control,adj_q_mirna_cholestasis_v_control)
+
+deg_mirna_cholestasis_v_drained<- top_genes2[match(rownames(adj_q_mirna_cholestasis_v_drained),rownames(top_genes2)),]
+q_log_deg_mirna_cvd<- cbind(logFC= deg_mirna_cholestasis_v_drained$cholestasis_v_drained,adj_q_mirna_cholestasis_v_drained)
+
+#mRNA diff exp genes
+
+deg_mrna_drained_v_control<- top_genes[match(rownames(adj_q_mrna_drained_v_control),rownames(top_genes)),]
+q_log_deg_mrna_dvco<- cbind(logFC= deg_mrna_drained_v_control$drained_v_control,adj_q_mrna_drained_v_control)
+
+deg_mrna_cholestasis_v_control<- top_genes[match(rownames(adj_q_mrna_cholestasis_v_control),rownames(top_genes)),]
+q_log_deg_mrna_chvco<- cbind(logFC= deg_mrna_cholestasis_v_control$cholestasis_v_control,adj_q_mrna_cholestasis_v_control)
+
+deg_mrna_cholestasis_v_drained<- top_genes[match(rownames(adj_q_mrna_cholestasis_v_drained),rownames(top_genes)),]
+q_log_deg_mrna_chvd<- cbind(logFC= deg_mrna_cholestasis_v_drained$cholestasis_v_drained,adj_q_mrna_cholestasis_v_drained)
 
 
