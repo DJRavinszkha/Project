@@ -75,20 +75,21 @@ format <- function(){
   colnames(mrna) <- columns                            # Assign this to the actual column names
   
   #=== Here we change the columns names of mirna (miRNA samples) to the sample names ===
-  columns = colnames(mirna)
-  columns[[1]] <- 'miRNA'
-  for (i in rep(2:length(colnames(mirna)))){
-    for ( j in rep(1:nrow(labels))){
-      if(colnames(mirna[i]) == labels[j,1]){
-        columns[[i]] = labels[j,3] # Assign correct column name to array
-        # print(labels[j,1])
-        # print(colnames(mirna[i]))
-        # print(labels[j, 3])
-        # print("======")
-      }
-    }
-  }
-  colnames(mirna) <- columns
+  # 
+  # columns[[1]] <- 'miRNA'
+  # for (i in rep(2:length(colnames(mirna)))){
+  #   for ( j in rep(1:nrow(labels))){
+  #     if(colnames(mirna[i]) == labels[j,1]){
+  #       columns[[i]] = labels[j,3] # Assign correct column name to array
+  #       # print(labels[j,1])
+  #       # print(colnames(mirna[i]))
+  #       # print(labels[j, 3])
+  #       # print("======")
+  #     }
+  #   }
+  # }
+  #There is something wrong with naming as FGS_01 is not the first columns and last column is NA
+  
   
   #mrna
   rownames(mrna) <- mrna[,1] # Set entrezid as index for mrna; can use key to find gene symbols based on index
@@ -97,6 +98,8 @@ format <- function(){
   #mirna
   rownames(mirna) <- mirna[,1] # Set mirna names as index for mirna
   mirna <- mirna[,2:29]        # Set mirna to only contain expression values
+  colnames(mirna) <- labels$sample.name[order(labels$treatment.id)] ##REQUIRED!!!! in order to preserve order of miRNA sample naming
+  
   
   #=============================#
   ##   Create phenotype data   ##     # Do we need this?
@@ -166,4 +169,3 @@ format <- function(){
   
   return(list(mrna, mirna, labels, key))
 }
-
