@@ -302,7 +302,7 @@ conf$sex.id[conf$sex == "M"] <- 1 #change male to 1
 conf$sex.id[conf$sex == "F"] <- 2 #change male to 1
 
 sex<- factor(conf$sex.id) #Create a factor of sex, as confounder
-age<- c(conf$age) #Didn´t create factor due to number of unique ages; therefore kept it a vector
+age<- factor(conf$age) #Didn´t create factor due to number of unique ages; therefore kept it a vector
 
 design2 <- model.matrix(~ 0 + factor(labels$treatment.id) + factor(labels$mRNA.batch.id) + sex + age)
 
@@ -424,4 +424,127 @@ q_log_deg_mrna_chvco<- cbind(logFC= deg_mrna_cholestasis_v_control$cholestasis_v
 deg_mrna_cholestasis_v_drained<- top_genes[match(rownames(adj_q_mrna_cholestasis_v_drained),rownames(top_genes)),]
 q_log_deg_mrna_chvd<- cbind(logFC= deg_mrna_cholestasis_v_drained$cholestasis_v_drained,adj_q_mrna_cholestasis_v_drained)
 
-## 
+############################################################
+##############################################################
+##############################################################
+#=======================================================================#
+# STEFAN'S CODE : FOR TESTING PURPOSES
+
+sampleGroups <- data.frame(treatment = labels$treatment, treatment.id = labels$treatment.id, sampleName = labels$sample.name)
+
+# Get batch order mrna (copied from pca)
+mrna.batches <- data.frame(batch = labels$mRNA.batch, batch.id = labels$mRNA.batch.id, file = labels$mRNA.file)
+
+# Get batch order mirna (copied from pca)
+mirna.batches <- data.frame(batch = labels$miRNA.batch, batch.id = labels$miRNA.batch.id, file = labels$mRNA.file)
+#========#
+
+design <- matrix(nrow = (ncol(mrna)), ncol = 1)
+colnames(design) <- "sampleName"
+design[,1] <- colnames(mrna)
+design <- merge(design, sampleGroups, by = "sampleName", sort = FALSE)
+
+design1 <- model.matrix(~ 0 + factor(labels$treatment.id))
+#mrna.corrected <- removeBatchEffect(mrna, factor(labels$mRNA.batch.id), design=design1) Move to PCA; only useful for visualisation
+#When we creqte this function, design be one of the outputs to be called in PCA.R
+
+#Initialise metadata (age, sex and bilirubin lvels). Move to dataFormatting.R. 
+#Refer to whatsapp files to download correct file, 
+mrna.meta <- read.delim("../Data/metadata_mrna.csv", sep=',',header = TRUE, colClasses = 'character')
+conf <- data.frame(sample.name = mrna.meta$Sample[1:28], sex = mrna.meta$gender[1:28], age = mrna.meta$age[1:28], bili.tot = mrna.meta$Bili..tot.[1:28])
+
+conf$sex.id[conf$sex == "M"] <- 1 #change male to 1
+conf$sex.id[conf$sex == "F"] <- 2 #change female to 2
+
+sex<- factor(conf$sex.id) #Create a factor of sex, as confounder
+#age<- as.numeric(conf$age) #DidnÂ´t create factor due to number of unique ages; therefore kept it a vector
+age<- c(73.5, 76.4, 67.7, 63, 55.1, 84.5, 24.3, 72.1, 71.7, 70.3, 73.4, 51.5, 52.5, 49.5, 59.2, 57.8, 56.7, 48.1, 66.1, 67.2, 67.6,
+        41.5, 74.7, 36.3, 75.4, 74.2, 77.8, 59.9)
+design2 <- model.matrix(~ 0 + factor(labels$treatment.id) + factor(labels$mRNA.batch.id) + sex + age, 
+                        contrast.arg=list(state=contrasts(state, contrasts=TRUE),batch=contrasts(batch, contrasts = TRUE)))
+
+colnames(design2) <- c("cholestasis", "drained", "control", "batch2","batch3","batch4","sex","age")
+
+acont_matrix <- makeContrasts (drained_v_control = drained - control,
+                               cholestasis_v_control = cholestasis - control,
+                               cholestasis_v_drained = cholestasis - drained,
+                               levels = design2)
+
+conmat_DvC = makeContrasts(drained_v_control = drained - control,
+                           levels = design2)
+conmat_CHvC = makeContrasts(cholestasis_v_control = cholestasis - control,
+                            levels = design2)
+conmat_CHvD = makeContrasts(cholestasis_v_drained = cholestasis - drained,
+                            levels = design2)
+
+
+#-----------------------------------------------------------#
+
+
+fit <- lmFit(mrna, design2)
+
+fit_contrast_DvC = contrasts.fit(fit, conmat_DvC)
+fit_contrast_DvC = eBayes(fit_contrast_DvC)
+
+fit_contrast_CHvC = contrasts.fit(fit, conmat_CHvC)
+fit_contrast_CHvC = eBayes(fit_contrast_CHvC)
+
+fit_contrast_CHvD= contrasts.fit(fit, conmat_CHvD)
+fit_contrast_CHvD = eBayes(fit_contrast_CHvD)
+
+#--------------------------------------------------------#
+
+
+result_DvC = decideTests(fit_contrast_DvC)
+summary(result_DvC)
+
+result_CHvC = decideTests(fit_contrast_CHvC)
+summary(result_CHvC)
+
+result_CHvD = decideTests(fit_contrast_CHvD)
+summary(result_CHvD)
+
+#-----------------------------------#
+# Creating the pairwise comparisons in the contrast matrixs seperately.
+
+conmat_DvC = makeContrasts(drained_v_control = drained - control,
+                           levels = design2)
+conmat_CHvC = makeContrasts(cholestasis_v_control = cholestasis - control,
+                            levels = design2)
+conmat_CHvD = makeContrasts(cholestasis_v_drained = cholestasis - drained,
+                            levels = design2)
+
+
+#-----------------------------------------------------------#
+
+
+fit <- lmFit(mrna, design2)
+
+fit_contrast_DvC = contrasts.fit(fit, conmat_DvC)
+fit_contrast_DvC = eBayes(fit_contrast_DvC)
+
+fit_contrast_CHvC = contrasts.fit(fit, conmat_CHvC)
+fit_contrast_CHvC = eBayes(fit_contrast_CHvC)
+
+fit_contrast_CHvD= contrasts.fit(fit, conmat_CHvD)
+fit_contrast_CHvD = eBayes(fit_contrast_CHvD)
+
+#--------------------------------------------------------#
+
+
+result_DvC = decideTests(fit_contrast_DvC)
+summary(result_DvC)
+
+result_CHvC = decideTests(fit_contrast_CHvC)
+summary(result_CHvC)
+
+result_CHvD = decideTests(fit_contrast_CHvD)
+summary(result_CHvD)
+
+
+#----------------------------------------------------------#
+top_genes_DvC = topTable(fit_contrast_DvC, p.value=0.05, number = nrow(mrna), adjust = "BH")
+top_genes_CHvC = topTable(fit_contrast_CHvC, p.value=0.05, number = nrow(mrna), adjust = "BH")
+top_genes_CHvD = topTable(fit_contrast_CHvD, p.value=0.05, number = nrow(mrna), adjust = "BH")
+
+#---------------------------------------------------------------------------------------#
