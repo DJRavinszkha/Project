@@ -78,15 +78,23 @@ miRNA_target_query <- function(mirna, mrna){
   target = list()
   
   # Initiate progress bar
-  progress <- txtProgressBar(min = 0, max = length(miRNA_names), initial = 0)
+  progress <- txtProgressBar(min = 0, max = nrow(miRNA_names), initial = 0)
   
+  options(timeout = 100000) # Set timeout to increase time for retrying queries
+  error_list = list()
   step = 0
   nTargets = 0
-  for (i in 1:length(miRNA_names)){
+  for (i in 1:nrow(miRNA_names)){
     step = step + 1
-    name = paste("%22", miRNA_names[i], "%22", sep = "")          # Set name in correct URL format
+    name = paste("%22", miRNA_names[2,1], "%22", sep = "")        # Set name in correct URL format
     miRNA_link <- sprintf(link_temaplate, name, minSources, name) # Create URL link to miRNA targets
     target <- try(fromJSON(miRNA_link))                           # Query the miRNA - try returns error for server errors
+    
+    if (typeof(target) == 'char'){
+      error_list <- append(error_list, c(name, target))           # Capture error
+      next                                                        # Jump to next iteration
+    }
+    
     #names(target)[3] <- miRNA_names[i]                           # Set list item name to miRNA name                    
     mirna_targets <- append(mirna_targets, list(as.matrix(target$rows)))# Add the miRNA targets to one long list of targets
     nTargets <- nTargets +  nrow(as.matrix(target$rows))          # Keep track of the total number of targets
