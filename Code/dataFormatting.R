@@ -24,7 +24,7 @@ format <- function(){
   setwd(dirname(current_path ))
   mrna = read.delim('../Data/GeneExpressionNormalized.txt', check.names = FALSE) #Load expression data
   mirna = read.delim('../Data/miRNAexpression.txt', check.names = FALSE)        #Load miRNA expression data
-  colnames(mrna)[10] <- "FGS_10_410978_2_3_H"                                   #Change the name of one variable due to error
+  #colnames(mrna)[10] <- "FGS_10_410978_2_3_H"                                   #Change the name of one variable due to error
   
   #Initialise a dataframe called labels, containing all:
   # file/batch names and sample names 
@@ -43,7 +43,7 @@ format <- function(){
   labels$V6[labels$V5 == "410979"] <- 2 #set id 2
   labels$V6[labels$V5 == "410980"] <- 3 #set id 3
   labels$V6[labels$V5 == "412287"] <- 4 #set id 4
-  
+  labels$V6[labels$V5 == "422569"] <- 5 #set id 5
   #Here we initialise batch number id's for miRNA's
   labels$V7 <- substr(unlist(labels$V1), 12, 23)
   labels$V8[labels$V7 == "254606410403"] <- 1 #set id 1 to miRNA batch
