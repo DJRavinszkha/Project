@@ -116,9 +116,9 @@ summary(result_CHvD)
 
 #----------------------------------------------------------#
 # Find significant DEGs with log fold change higher than (lfc).
-top_genes_DvC = topTable(fit_contrast_DvC, lfc = 1.5, p.value=0.05, number = nrow(mrna), adjust = "BH")
-top_genes_CHvC = topTable(fit_contrast_CHvC,lfc = 1.5, p.value=0.05, number = nrow(mrna), adjust = "BH")
-top_genes_CHvD = topTable(fit_contrast_CHvD,lfc = 1.5, p.value=0.05, number = nrow(mrna), adjust = "BH")
+top_genes_DvC = topTable(fit_contrast_DvC,  p.value=0.05, number = nrow(mrna), adjust = "BH")
+top_genes_CHvC = topTable(fit_contrast_CHvC, p.value=0.05, number = nrow(mrna), adjust = "BH")
+top_genes_CHvD = topTable(fit_contrast_CHvD, p.value=0.05, number = nrow(mrna), adjust = "BH")
 
 #----------------------------------------------------------#
 
@@ -206,9 +206,9 @@ result_CHvD = decideTests(fit_contrast_CHvD)
 summary(result_CHvD)
 #----------------------------------------------
 # Find DEGs on miRNA. 
-mirna.top_genes_DvC = topTable(fit_contrast_DvC, lfc=1.2, p.value=0.05, number = nrow(mirna), adjust = "BH")
-mirna.top_genes_CHvC = topTable(fit_contrast_CHvC,lfc=1.2, p.value=0.05, number = nrow(mirna), adjust = "BH")
-mirna.top_genes_CHvD = topTable(fit_contrast_CHvD,lfc=1.2, p.value=0.05, number = nrow(mirna), adjust = "BH")
+mirna.top_genes_DvC = topTable(fit_contrast_DvC, p.value=0.05, number = nrow(mirna), adjust = "BH")
+mirna.top_genes_CHvC = topTable(fit_contrast_CHvC, p.value=0.05, number = nrow(mirna), adjust = "BH")
+mirna.top_genes_CHvD = topTable(fit_contrast_CHvD, p.value=0.05, number = nrow(mirna), adjust = "BH")
 
 #----------------------------------------------
 
