@@ -18,6 +18,7 @@ BiocManager::install("qvalue")
 
 library(qvalue)
 library(limma)
+
 #====================================#
 ## Differential Expression Analysis ##
 #====================================#
@@ -232,13 +233,3 @@ rownames(DEG_CHvC)<- mirna.names_top_CHvC
 mirna.DEG_CHvD<- data.frame(Gene.Symb=mirna.symb.CHvD,logFC= mirna.top_genes_CHvD$logFC, adj.p= mirna.top_genes_CHvD$adj.P.Val)
 rownames(DEG_CHvD)<- mirna.names_top_CHvD
 
-
-#---------------------------------------------------------------------------------------#
-##                                       GENE ONTOLOGY
-#---------------------------------------------------------------------------------------#
-
-if (!requireNamespace("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
-
-BiocManager::install("topGO")
-l
