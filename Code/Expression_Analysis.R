@@ -225,11 +225,11 @@ mirna.symb.CHvD<- key$Genesymbol[match(mirna.names_top_CHvD, key$EntrezID)]
 
 # Create DEG dataframe 
 mirna.DEG_DvC<- data.frame(Gene.Symb=mirna.symb.DvC, logFC= mirna.top_genes_DvC$logFC,adj.p= mirna.top_genes_DvC$adj.P.Val)
-#rownames(DEG_DvC)<- names_top_DvC  Uncomment if top_genes_DvC has length different than 0. 
+#rownames(mirna.DEG_DvC)<- names_top_DvC  Uncomment if top_genes_DvC has length different than 0. 
 
 mirna.DEG_CHvC<- data.frame(Gene.Symb=mirna.symb.CHvC,logFC= mirna.top_genes_CHvC$logFC, adj.p= mirna.top_genes_CHvC$adj.P.Val)
-rownames(DEG_CHvC)<- mirna.names_top_CHvC
+rownames(mirna.DEG_CHvC)<- mirna.names_top_CHvC
 
 mirna.DEG_CHvD<- data.frame(Gene.Symb=mirna.symb.CHvD,logFC= mirna.top_genes_CHvD$logFC, adj.p= mirna.top_genes_CHvD$adj.P.Val)
-rownames(DEG_CHvD)<- mirna.names_top_CHvD
+rownames(mirna.DEG_CHvD)<- mirna.names_top_CHvD
 
