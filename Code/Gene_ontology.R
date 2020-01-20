@@ -37,8 +37,9 @@ GOdata_CHvC <- new("topGOdata",
                    annot=annFUN.GO2genes,
                    geneSel= function(x)x,
                    GO2genes=allGO2genes,
-                   nodeSize=1)
+                   nodeSize=10)
 GOdata_CHvC
+
 results.ks <- runTest(GOdata_CHvC, algorithm="classic", statistic="ks")
 goEnrichment <- GenTable(GOdata_CHvC, KS=results.ks, orderBy="KS", topNodes=20)
 goEnrichment <- goEnrichment[goEnrichment$KS<0.05,]
@@ -70,8 +71,8 @@ ggplot(goEnrichment, aes(x=Term, y=-log10(KS))) +
   guides(colour=guide_legend(override.aes=list(size=2.5))) +
   coord_flip()
 
-printGraph(GOdata_CHvC, resultWeight, firstSigNodes = 5, fn.prefix = "tGO",
-              pdfSW = TRUE) # Not working
+#printGraph(GOdata_CHvC, resultWeight, firstSigNodes = 5, fn.prefix = "tGO",
+#              pdfSW = TRUE) # Not working
 
 
 ### WARNING NEED MULTIPLE TESTING CORRECTION 
@@ -87,6 +88,7 @@ predictions <- getPredictedTargets(mir, species = 'hsa',
 library(miRNAtap)
 library(topGO)
 library(org.Hs.eg.db)
+
 mir = 'miR-10b'
 predictions = getPredictedTargets(mir, species = 'hsa',
                                   method = 'geom', min_src = 2)
@@ -95,7 +97,7 @@ BiocManager::install("multiMiR")
 library(multiMiR)
 
 targets.mirna_CHvC <- get_multimir(mirna=mirna.names_top_CHvC, summary=TRUE)
-genes.mirna_CHvC<- targets.mirna_CHvC@summary$target_entrez
+genes.mirna_CHvC<- targets.mirna_CHvC@data$target_entrez
 
 
 
@@ -144,3 +146,13 @@ ggplot(goEnrichment, aes(x=Term, y=-log10(KS))) +
   guides(colour=guide_legend(override.aes=list(size=2.5))) +
   coord_flip()
 
+#######################################
+BiocManager::install("Rgraphviz") 
+library(Rgraphviz)
+
+sel.terms <- sample(usedGO(GOdata_CHvC), length(GOdata_CHvC@graph@edgeL))
+ann.genes <- genesInTerm(GOdata_CHvC, usedGO(GOdata_CHvC)) ## get the annotations
+head(ann.genes)
+
+# showSigOfNodes(GOdata_CHvC, score(results.ks), firstSigNodes = 8, useInfo = 'def')
+printGraph(GOdata_CHvC, results.ks, firstSigNodes = 20, fn.prefix = "tGO", useInfo = "all", pdfSW = TRUE)
