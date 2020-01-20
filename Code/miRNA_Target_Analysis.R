@@ -19,6 +19,7 @@ library(jsonlite)
 
 if (!requireNamespace("multiMiR", quietly = TRUE))
   BiocManager::install("multiMiR")
+library(multiMiR)
 
 if (!requireNamespace("miRNAtap", quietly = TRUE))
   BiocManager::install("miRNAtap")
@@ -142,6 +143,8 @@ miRNA_target_query_targetHUB <- function(mirna, mrna){
   }
 }
 
-miRNA_target_query_miRNAtap <- function(mirna, mrna){
+miRNA_target_query_multiMiR <- function(miRNA.CHVC){ # Still have to implement other comparison groups
+  miRNA.targets.CHVC <- get_multimir(mirna = miRNA.CHVC$mirna.Name, summary = TRUE)
   
+  return(miRNA.targets.CHVC) 
 }
