@@ -17,6 +17,15 @@ if (!requireNamespace("miRBaseConverter", quietly = TRUE))
 library(miRBaseConverter)
 library(jsonlite)
 
+if (!requireNamespace("multiMiR", quietly = TRUE))
+  BiocManager::install("multiMiR")
+
+if (!requireNamespace("miRNAtap", quietly = TRUE))
+  BiocManager::install("miRNAtap")
+
+if (!requireNamespace("miRNAtap.db", quietly = TRUE))
+  BiocManager::install("miRNAtap.db")
+
 #========================================================================================================#
 # This function calculates pearson correlations between micro- and messenger RNA expression              #
 # You will input the RNA expression values for your group of interest (e.g. all cases)                   #
@@ -72,7 +81,7 @@ miRNA_correlate <- function(mirna, mrna){
 # Kozomara A, Griffiths-Jones S.                                                                         #
 # Nucleic Acids Res. 2011 39:D152-D157                                                                   #
 #========================================================================================================#
-miRNA_target_query <- function(mirna, mrna){
+miRNA_target_query_targetHUB <- function(mirna, mrna){
   #==== miRNA version conversion - Currently not used!!! ===#
   miRNA_names <- row.names(mirna)                                       # Store miRNA names
   version = checkMiRNAVersion(row.names(mirna), verbose = TRUE)         # Check miRNA name version
@@ -133,3 +142,6 @@ miRNA_target_query <- function(mirna, mrna){
   }
 }
 
+miRNA_target_query_miRNAtap <- function(mirna, mrna){
+  
+}
