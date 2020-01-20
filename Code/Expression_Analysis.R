@@ -195,6 +195,15 @@ mRNA.CHVC <- function(){
   #= Volcano =#
   volcano(fit.mrna.CHVC)
   
+  #= Heat Map =#
+  mrna.DEG.CHVC$mRNA <- rownames(mrna.DEG.CHVC)
+  mrna$mRNA <- rownames(mrna)
+  mrna.heat.CHVC <- merge(mrna, mrna.DEG.CHVC, by = "mRNA", sort = FALSE)
+  heatmap.2(as.matrix(unique(mrna.heat.CHVC[,2:29])), 
+            trace = "none", 
+            main="mRNA heatmap (CHVC)", 
+            labRow = mrna.heat.CHVC$Gene.Symb)
+  
   return(mrna.DEG.CHVC)
 }
 ##===== Cholestatic Vs Drained (CHVD) =====##
@@ -227,26 +236,18 @@ mRNA.CHVD <- function(){
   #= Volcano =#
   volcano(fit.mrna.CHVD)
   
+  #= Heat Map =#
+  mrna.DEG.CHVD$mRNA <- rownames(mrna.DEG.CHVD)
+  mrna$mRNA <- rownames(mrna)
+  mrna.heat.CHVD <- merge(mrna, mrna.DEG.CHVD, by = "mRNA", sort = FALSE)
+  heatmap.2(as.matrix(unique(mrna.heat.CHVD[,2:29])), 
+            trace = "none", 
+            main="mRNA heatmap (CHVD)", 
+            labRow = mrna.heat.CHVD$Gene.Symb)
+  
+  
   return(mrna.DEG.CHVD)
 }
-
-##===== Plots =====##
-#= Heat Map =#
-
-# mrna.DEG.CHVC$mRNA <- rownames(mrna.DEG.CHVC)
-# mrna$mRNA <- rownames(mrna)
-# mrna.heat.CHVC <- merge(mrna, mrna.DEG.CHVC, by = "mRNA", sort = FALSE)
-# heatmap.2(as.matrix(unique(mrna.heat.CHVC[,2:29])), trace = "none", main="mRNA heatmap (CHVC)", labRow = mrna.heat$Gene.Symb)
-# 
-# mrna.DEG.CHVD$mRNA <- rownames(mrna.DEG.CHVD)
-# mrna$mRNA <- rownames(mrna)
-# mrna.heat.CHVD <- merge(mrna, mrna.DEG.CHVD, by = "mRNA", sort = FALSE)
-# heatmap.2(as.matrix(unique(mrna.heat.CHVD[,2:29])), trace = "none", main="mRNA heatmap (CHVD)", labRow = mrna.heat$Gene.Symb)
-
-# mrna.DEG.DVC$mRNA <- rownames(mrna.DEG.DVC)
-# mrna$mRNA <- rownames(mrna)
-# mrna.heat.DVC <- merge(mrna, mrna.DEG.DVC, by = "mRNA", sort = FALSE)
-# heatmap.2(as.matrix(unique(mrna.heat.DVC[,2:29])), trace = "none", main="mRNA heatmap", labRow = mrna.heat$Gene.Symb)
 
 #============================================#
 ##                  miRNA                   ##
