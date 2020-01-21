@@ -13,6 +13,8 @@
 ##         Install libraries             ##
 #=========================================#
 BiocManager::install(c("multiMiR", "topGo", "org.Hs.eg.db", "Rgraphviz","edgeR"))
+install.packages('padr')
+
 library(qvalue)
 library(limma)
 library(multiMiR)
@@ -22,6 +24,8 @@ library(edgeR)
 library(org.Hs.eg.db)
 library(ggplot2)
 library(rstudioapi)
+library(reshape2)
+library(plyr)
 
 #=========================================#
 ##          Initialise Files             ##
@@ -106,7 +110,26 @@ plotGO <- function(GO,
   
   print(plot)
   return(results.ks)
+}
+
+adj.mat <-function(GO, mRNA_DEG){
+  
+  ann.genes <- genesInTerm(GO, usedGO(GO)) ## get the annotations
+  
+  # Initialize adj matrix
+  adj.matrix<- data.frame(matrix(0, nrow = length(mRNA_DEG[[1]]$mRNA), ncol = length(usedGO(GO.mrna.CHVC))))
+  colnames(adj.matrix)<- usedGO(GO)
+  rownames(adj.matrix)<- mRNA_DEG[[1]]$mRNA
+  
+  for (a in 1:length(usedGO(GO.mrna.CHVC))){
+    genes<-ann.genes[[a]]
+    for (b in 1:length(genes)){
+      current<-genes[b]
+      adj.matrix[which(rownames(adj.matrix)== current),a]<- 1}
   }
+  adj.matrix<- data.frame(ids=rownames(adj.matrix),adj.matrix) # Only for testing purposes
+  return(adj.matrix)
+}
 
 #=========================================#
 ##                mRNA                   ##
@@ -117,57 +140,114 @@ result.ks.CHVC<-plotGO(GO.mrna.CHVC,
                        20, 
                       "mRNA1: GO enrichment Cholestatic vs Control")
 
+#showSigOfNodes(GOdata_CHvC, score(results.ks), firstSigNodes = 8, useInfo = 'def') #View network in panel
+printGraph(GO.mrna.CHVC, result.ks.CHVC, firstSigNodes = 20, fn.prefix = "tGO", useInfo = "all", pdfSW = TRUE) # Save network in pdf
+
+# Matrix for igraph 
+adj.mat.GO_CHVC<-adj.mat(GO.mrna.CHVC,mRNA.CHVC)
+data_long<-melt(adj.mat.GO_CHVC) # change data to format long
+data_long_CHVC<- data_long[data_long[,3] != 0,]
+
+
 ##===== Cholestatic Vs Drained (CHVD) =====##
 GO.mrna.CHVD <- GO(mRNA.CHVD[[1]]$adj.p, mRNA.CHVD[[2]])
 result.ks.CHVD<-plotGO(GO.mrna.CHVD, 
                         20, 
                         "mRNA1: GO enrichment Cholestatic vs Drained")
 
+printGraph(GO.mrna.CHVD, result.ks.CHVD, firstSigNodes = 20, fn.prefix = "tGO", useInfo = "all", pdfSW = TRUE) # Save network in pdf
+
+adj.mat.GO_CHVD<-adj.mat(GO.mrna.CHVD,mRNA.CHVD)
+data_long<-melt(adj.mat.GO_CHVD) # change data to format long
+data_long_CHVD<- data_long[data_long[,3] != 0,]
+
+#### 
+# CODE FOR ADJ MATRIX WITHOUT MESSING THINGS UP 
+# ann.genes <- genesInTerm(GO.mrna.CHVC, usedGO(GO.mrna.CHVC)) ## get the annotations
+# 
+# # Initialize adj matrix
+# adj.mat.GO_CHVC<- data.frame(matrix(0, nrow = length(mRNA.CHVC[[1]]$mRNA), ncol = length(usedGO(GO.mrna.CHVC))))
+# colnames(adj.mat.GO_CHVC)<- usedGO(GO.mrna.CHVC)
+# rownames(adj.mat.GO_CHVC)<- mRNA.CHVC[[1]]$mRNA
+# 
+# for (a in 1:length(usedGO(GO.mrna.CHVC))){
+#   genes<-ann.genes[[a]]
+#   for (b in 1:length(genes)){
+#     current<-genes[b]
+#     adj.mat.GO_CHVC[which(rownames(adj.mat.GO_CHVC)== current),a]<- 1}
+# }
+# adj.mat.GO_CHVC<- data.frame(ids=rownames(adj.mat.GO_CHVC),adj.mat.GO_CHVC) # Only for testing purposes
+
+
 #=========================================#
 ##               miRNA                   ##
 #=========================================#
 
 #= Cholestatic V Control (CHVC) =#
+# Get targets
 mirna.targets.CHVC <- get_multimir(mirna = miRNA.CHVC$mirna.Name, summary = TRUE)
 targets.names.CHVC <- data.frame(mRNA = mirna.targets.CHVC@data$target_entrez, 
                                  mirna = mirna.targets.CHVC@data$mature_mirna_id,
                                  source = mirna.targets.CHVC@data$pubmed_id)
 
-mirna.targets.DEG.CHVC <- merge(mrna.CHVC[[1]], targets.names.CHVC, by = "mRNA", sort = FALSE)
+# Find which targets are present on our mRNA list
+mirna.targets.DEG.CHVC <- merge(mRNA.CHVC[[1]], targets.names.CHVC, by = "mRNA", sort = FALSE)
 
-#Find unique genes
+#Find unique targets (Avoid double testing)
 uniqueMirna.targets.DEG.CHVC <- mirna.targets.DEG.CHVC[!duplicated(mirna.targets.DEG.CHVC$mRNA),]
 
+#GO enrichment for the mRNA targets
 GO.mirna.CHVC <- GO(uniqueMirna.targets.DEG.CHVC$adj.p, uniqueMirna.targets.DEG.CHVC$mRNA)
-plotGO(GO.mirna.CHVC, 
-       20, 
-       "mRNA2: GO enrichment Cholestatic vs Control")
+result.mirna.ks.CHVC <-plotGO(GO.mirna.CHVC, 
+                              20, 
+                             "Targets miRNA: GO enrichment Cholestatic vs Control")
+
+# Adjacency matrix
+adj.mat.mirna.GO_CHVC<-adj.mat(GO.mirna.CHVC,miRNA.CHVC)
+data_long<-melt(adj.mat.GO_CHVD) # change data to format long
+data_long_CHVD<- data_long[data_long[,3] != 0,]
 
 #= Cholestatic V Drained (CHVD) =#
+# Get targets
 mirna.targets.CHVD <- get_multimir(mirna = miRNA.CHVD$mirna.Name, summary = TRUE)
 targets.names.CHVD <- data.frame(mRNA = mirna.targets.CHVD@data$target_entrez, 
                                  mirna = mirna.targets.CHVD@data$mature_mirna_id,
                                  source = mirna.targets.CHVD@data$pubmed_id)
 
+# Find which targets are present on our mRNA list
 mirna.targets.DEG.CHVD <- merge(mRNA.CHVD[[1]], targets.names.CHVD, by = "mRNA", sort = FALSE)
 
-#Find unique genes
+#Find unique mRNAs
 uniqueMirna.targets.DEG.CHVD <- mirna.targets.DEG.CHVD[!duplicated(mirna.targets.DEG.CHVD$mRNA),]
 
+# GO enrichment for mRNA targets
+
 GO.mirna.CHVD <- GO(uniqueMirna.targets.DEG.CHVD$adj.p, uniqueMirna.targets.DEG.CHVD$mRNA)
-plotGO(GO.mirna.CHVD, 
-       20, 
-       "GO enrichment Cholestatic vs Control Part2") 
+result.mirna.ks.CHVD <-plotGO(GO.mirna.CHVD, 
+                              20, 
+                            "Targets miRNA: GO enrichment Cholestatic vs Drained") 
+
 
 
 ####======####
-#Remove rows if source, mRNA and miRNA are duplicated in combination. 
-unique.Interaction <- mirna.targets.DEG.CHVC[!duplicated(mirna.targets.DEG.CHVC[1, 5, 6]),]
 
-sel.terms <- sample(usedGO(GO.mrna.CHVC),1815)
-ann.genes <- genesInTerm(GO.mrna.CHVC, usedGO(GO.mrna.CHVC)) ## get the annotations
-a<- ann.genes$`GO:0000003`
-
-showSigOfNodes(GOdata_CHvC, score(results.ks), firstSigNodes = 8, useInfo = 'def')
-printGraph(GO.mrna.CHVC, result.ks.CHVC, firstSigNodes = 20, fn.prefix = "tGO", useInfo = "all", pdfSW = TRUE)
+# # Get genes corresponding to each GO term
+# ann.genes <- genesInTerm(GO.mrna.CHVC, usedGO(GO.mrna.CHVC)) ## get the annotations
+# 
+# # Initialize adj matrix
+# adj.mat.GO_CHVC<- data.frame(matrix(0, nrow = length(mRNA.CHVC[[1]]$mRNA), ncol = length(usedGO(GO.mrna.CHVC))))
+# colnames(adj.mat.GO_CHVC)<- usedGO(GO.mrna.CHVC)
+# rownames(adj.mat.GO_CHVC)<- mRNA.CHVC[[1]]$mRNA
+# 
+# for (a in 1:length(usedGO(GO.mrna.CHVC))){
+#   genes<-ann.genes[[a]]
+#   for (b in 1:length(genes)){
+#   current<-genes[b]
+#   adj.mat.GO_CHVC[which(rownames(adj.mat.GO_CHVC)== current),a]<- 1}
+# }
+# adj.mat.GO_CHVC<- data.frame(ids=rownames(adj.mat.GO_CHVC),adj.mat.GO_CHVC) # Only for testing purposes
+# 
+# 
+# showSigOfNodes(GOdata_CHvC, score(results.ks), firstSigNodes = 8, useInfo = 'def')
+# printGraph(GO.mrna.CHVC, result.ks.CHVC, firstSigNodes = 20, fn.prefix = "tGO", useInfo = "all", pdfSW = TRUE)
 

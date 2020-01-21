@@ -317,7 +317,8 @@ miRNA.DVC <- function(){
   #= Volcano =#
   volcano(fit.mirna.DVC)
   
-  return(mirna.DEG.DVC)
+  return(list(mirna.DEG.DVC, mirna.namesTop.DVC))
+  
 }
 
 ##===== Cholestatic Vs Control (CHVC) =====##
@@ -347,7 +348,7 @@ miRNA.CHVC <- function(){
   #= Volcano =#
   volcano(fit.mirna.CHVC)
   
-  return(mirna.DEG.CHVC)
+  return(list(mirna.DEG.CHVC, mirna.namesTop.CHVC))
 }
 
 ##===== Cholestatic Vs Drained (CHVD) =====##
@@ -377,7 +378,7 @@ miRNA.CHVD <- function(){
   #= Volcano =#
   volcano(fit.mirna.CHVD)
   
-  return(mirna.DEG.CHVD)
+  return(list(mirna.DEG.CHVD, mirna.namesTop.CHVD))
 }
 
 ##===== Plots =====##
