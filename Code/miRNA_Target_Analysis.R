@@ -144,7 +144,10 @@ miRNA_target_query_targetHUB <- function(mirna, mrna){
 }
 
 miRNA_target_query_multiMiR <- function(miRNA.CHVC){ # Still have to implement other comparison groups
-  miRNA.targets.CHVC <- get_multimir(mirna = miRNA.CHVC$mirna.Name, summary = TRUE)
+  miRNA.targets.CHVC <- get_multimir(mirna = miRNA.CHVC$mirna.Name, summary = TRUE) # Query the miRNA targets
   
-  return(miRNA.targets.CHVC) 
+  DEG.CHVC.names <- rownames(mrna.CHVC)
+  miRNA.targets.CHVC.DEG <- miRNA.targets.CHVC@data[miRNA.targets.CHVC@data[,"target_entrez"] %in% DEG.CHVC.names,]
+  
+  return(miRNA.targets.CHVC.DEG) 
 }

@@ -192,19 +192,19 @@ mRNA.CHVC <- function(){
   mrna.DEG.CHVC <- data.frame(Gene.Symb=symb.mrna.CHVC, logFC= mrna.expressed.CHVC$logFC, adj.p= mrna.expressed.CHVC$adj.P.Val)
   rownames(mrna.DEG.CHVC)<- namesTop.mrna.CHVC
   
-  #= Volcano =#
-  volcano(fit.mrna.CHVC)
+  # #= Volcano =#
+  # volcano(fit.mrna.CHVC)
+  # 
+  # #= Heat Map =#
+  # mrna.DEG.CHVC$mRNA <- rownames(mrna.DEG.CHVC)
+  # mrna$mRNA <- rownames(mrna)
+  # mrna.heat.CHVC <- merge(mrna, mrna.DEG.CHVC, by = "mRNA", sort = FALSE)
+  # heatmap.2(as.matrix(unique(mrna.heat.CHVC[,2:29])), 
+  #           trace = "none", 
+  #           main="mRNA heatmap (CHVC)", 
+  #           labRow = mrna.heat.CHVC$Gene.Symb)
   
-  #= Heat Map =#
-  mrna.DEG.CHVC$mRNA <- rownames(mrna.DEG.CHVC)
-  mrna$mRNA <- rownames(mrna)
-  mrna.heat.CHVC <- merge(mrna, mrna.DEG.CHVC, by = "mRNA", sort = FALSE)
-  heatmap.2(as.matrix(unique(mrna.heat.CHVC[,2:29])), 
-            trace = "none", 
-            main="mRNA heatmap (CHVC)", 
-            labRow = mrna.heat.CHVC$Gene.Symb)
-  
-  return(mrna.DEG.CHVC)
+  return(list(mrna.DEG.CHVC, namesTop.mrna.CHVC))
 }
 ##===== Cholestatic Vs Drained (CHVD) =====##
   
@@ -233,20 +233,20 @@ mRNA.CHVD <- function(){
                              adj.p= mrna.expressed.CHVD$adj.P.Val)
   rownames(mrna.DEG.CHVD)<- namesTop.mrna.CHVD
   
-  #= Volcano =#
-  volcano(fit.mrna.CHVD)
+  # #= Volcano =#
+  # volcano(fit.mrna.CHVD)
+  # 
+  # #= Heat Map =#
+  # mrna.DEG.CHVD$mRNA <- rownames(mrna.DEG.CHVD)
+  # mrna$mRNA <- rownames(mrna)
+  # mrna.heat.CHVD <- merge(mrna, mrna.DEG.CHVD, by = "mRNA", sort = FALSE)
+  # heatmap.2(as.matrix(unique(mrna.heat.CHVD[,2:29])), 
+  #           trace = "none", 
+  #           main="mRNA heatmap (CHVD)", 
+  #           labRow = mrna.heat.CHVD$Gene.Symb)
   
-  #= Heat Map =#
-  mrna.DEG.CHVD$mRNA <- rownames(mrna.DEG.CHVD)
-  mrna$mRNA <- rownames(mrna)
-  mrna.heat.CHVD <- merge(mrna, mrna.DEG.CHVD, by = "mRNA", sort = FALSE)
-  heatmap.2(as.matrix(unique(mrna.heat.CHVD[,2:29])), 
-            trace = "none", 
-            main="mRNA heatmap (CHVD)", 
-            labRow = mrna.heat.CHVD$Gene.Symb)
   
-  
-  return(mrna.DEG.CHVD)
+  return(list(mrna.DEG.CHVD, namesTop.mrna.CHVD))
 }
 
 #============================================#
