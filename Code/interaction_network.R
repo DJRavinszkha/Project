@@ -73,8 +73,7 @@ visualise_network <- function(){
                                              linkWidth = 1,
                                              opacity = 0.8,
                                              zoom    = TRUE,
-                                             fontSize = 30,
-                                             colourScale = c("red", "blue")
+                                             fontSize = 30
                                              )
   
   saveNetwork(miRNA_interaction_network, "miRNA_interaction_network.html")
