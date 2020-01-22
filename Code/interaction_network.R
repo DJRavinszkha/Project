@@ -1,4 +1,52 @@
-miRNA_mRNA_interaction_network <- function(miRNA.targets.CHVC.DEG){ # Still have to incorporate other  comparison groups
+#========================================================================================================#
+# This function converts data into two datasets required for visualising a network                       #
+#                                                                                                        #
+# Input:
+#   data: a matrix of which only the first two columns are used, it should contain interactions.
+#   Columns 1 contain sources, and column two contains targets that the source interact with.
+#   Column 3 can contain a value to weight the interaction --- CURRENTLY NON-FUNCTIONAL
+#
+# Output:
+# network_node:
+#   This data file contains the information on the different nodes in the  network, it contains the ID's #
+#   starting from 0, their according name that they correspond to, this can for example be entrez gene ID#
+#   or miRNA name. Also it contains a Group column where you can distinguish groups. By default this 
+#========================================================================================================#
+
+generate_network_data <- function(data){
+
+  # Create Source ID's
+  names <- unique(data[,1])
+  source_ID <- matrix(ncol = 3, nrow = length(names))   # Initialise ID matrix
+  source_ID[,2] <- names                                # Get all unqiue source names
+  source_ID[,1] <- seq(0,length(names) - 1)             # Create the ID's
+  source_ID[,3] <- 1                                    # Set group to Source
+  colnames(source_ID) <- c("ID", "name", "Group")       # Create column names
+  
+  # Create Target ID's
+  names <- unique(data[,2])
+  target_ID <- matrix(ncol = 3, nrow = length(names))   # Initialise ID matrix
+  target_ID[,2] <- names                                # Get all unqiue source names
+  target_ID[,1] <- seq(0,length(names) - 1)             # Create the ID's
+  target_ID[,3] <- 1                                    # Set group to Source
+  colnames(target_ID) <- c("ID", "name", "Group")       # Create column names
+  
+  network_data <- merge(data, source_ID, by.x = 1, by.y = "name", sort = FALSE)         # Put source ID's in network_data
+  network_data <- merge(network_data, target_ID, by.x = 2, by.y = "name", sort = FALSE) # Put target ID's in network_data
+  
+  # Create link data for network
+  network_link <- network_data[,c("ID.x", "ID.y")]
+  colnames(network_link) <- c("Source", "Target")
+  
+  # Create node data for network
+  network_node <- data.frame(do.call(rbind, list(source_ID, target_ID))) # Create node data by stacking the two ID matrices on top of eachother
+  
+  return(list(network_link, network_node))
+}
+
+
+
+generate_miRNA_mRNA_interaction_network_network <- function(data){ # Still have to incorporate other  comparison groups
   data <- miRNA.targets.CHVC.DEG                                                                 # load data
   data <- data[!duplicated(data[,c("mature_mirna_id", "target_entrez", "pubmed_id")]),]  # Filter out duplicates
   data <- data[data[,"target_entrez"] != "",] # Remove rows with missing entrez ID's
@@ -58,7 +106,7 @@ filter_interactions <- function(){
   mRNA.CHVC <- mRNA.CHVC()
 }
 
-visualise_network <- function(){
+visualise_network <- function(network_link, network_node, silent = TRUE){
   if (!requireNamespace("networkD3", quietly = TRUE))
     install.packages("networkD3")
   library(networkD3)
@@ -75,8 +123,13 @@ visualise_network <- function(){
                                              zoom    = TRUE,
                                              fontSize = 30
                                              )
+  if (!silent){
+    miRNA_interaction_network
+  }
   
   saveNetwork(miRNA_interaction_network, "miRNA_interaction_network.html")
   
   forceNetwork(Links = MisLinks, Nodes = MisNodes, Source = "source",Target = "target", Value = "value", NodeID = "name",Group = "group", opacity = 0.4, zoom = TRUE)
-}
+  
+  return(miRNA_interaction_network)
+  }
