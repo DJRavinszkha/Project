@@ -1,88 +1,114 @@
 #=============================================================================#
-# Project Period, Liver cholestasis data analysis         												  
-#	
-# Version: 1.0   															  
-# Date: 13-1-2020											             	  
-# Author:  Jip de Kok, Stefan Meier, Ariadna Fosch & Ravin Schmidl 
+# Project Period, Liver cholestasis data analysis         							      #					  
+#	Data Formatting                                                             #
+# Version: 1.0   															                                #
+# Date: 9-1-2020											             	                          #
+# Authors: Ariadna Fosch i Muntané, ID: I6215203, Maastricht University       #
+#          Jip de Kok, ID: I6119367 , Maastricht University                   #
+#          Ravin Schmidl, ID: I6125866, Maastricht University                 #
+#          Stefan Meier, ID: I6114194 , Maastricht University                 #
 #=============================================================================#
+#=========================================#
+##              Functions                ##
+#=========================================#
 
-#=== Install and load required packages ===#
-
-if (!requireNamespace("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
-
-if (!requireNamespace("miRBaseConverter", quietly = TRUE))
-  BiocManager::install("miRBaseConverter")
-
-library(miRBaseConverter)
-library(jsonlite)
-
-if (!requireNamespace("multiMiR", quietly = TRUE))
-  BiocManager::install("multiMiR")
-library(multiMiR)
-
-if (!requireNamespace("miRNAtap", quietly = TRUE))
-  BiocManager::install("miRNAtap")
-
-if (!requireNamespace("miRNAtap.db", quietly = TRUE))
-  BiocManager::install("miRNAtap.db")
-
-#========================================================================================================#
-# This function calculates pearson correlations between micro- and messenger RNA expression              #
-# You will input the RNA expression values for your group of interest (e.g. all cases)                   #
-# The output is a correlation matrix, showing the correlation between each possible pair of micro- and   #
-# messenger RNA and its significance value (p-value)                                                     #
-#========================================================================================================#
-miRNA_correlate <- function(mirna, mrna){
-  numberOfPairs <- nrow(mrna) * nrow(mirna)                           # Calculate number of miRNA-mRNA pairs
-  corMatrix <- matrix(nrow = numberOfPairs, ncol = 4)                 # Initialise corMatix which will store all correlations
-  colnames(corMatrix) <- c("miRNA", "mRNA", "pearson-cor", "p-value") # Set column names
+#=========================================#
+##             Correlation               ##
+#=========================================#
+miRNA_correlate <- function(miRNA, mRNA,
+                            only_DEG = FALSE,
+                            miRNA_DEG = NULL,
+                            mRNA_DEG = NULL,
+                            mrna.treatmentOrder = NULL){
+  #========================================================================================================#
+  # This function calculates pearson correlations between micro- and messenger RNA expression              #
+  # You will input the RNA expression values for your group of interest (e.g. all cases)                   #
+  # The output is a correlation matrix, showing the correlation between each possible pair of micro- and   #
+  # messenger RNA and its significance value (p-value)                                                     #
+  #========================================================================================================#
+  
+  if (only_DEG == TRUE){ # Filter only differential expressed genes and miRNA's
+    miRNA_DEG <- data.frame(miRNA_DEG)
+    miRNA <-merge(miRNA, miRNA_DEG, by.x = "row.names", by.y = "miRNA_DEG")
+    rownames(miRNA) <- miRNA[,1]
+    miRNA <- miRNA[,2:ncol(miRNA)]
+    
+    mRNA_DEG <- data.frame(mRNA_DEG)
+    mRNA <-merge(mRNA, mRNA_DEG, by.x = "row.names", by.y = "mRNA_DEG")
+    rownames(mRNA) <- mRNA[,1]
+    mRNA <- mRNA[,2:ncol(mRNA)]
+    
+  }
+  # Filter only the cases
+  cases <- mrna.treatmentOrder[mrna.treatmentOrder$treatment.id == 1,]
+  miRNA_case_index <- colnames(miRNA) %in% cases$sampleName
+  miRNA <- miRNA[,miRNA_case_index]
+  mRNA_case_index <- colnames(mRNA) %in% cases$sampleName
+  mRNA <- mRNA[,mRNA_case_index]
+  
+  # ===
+  numberOfPairs <- nrow(mRNA) * nrow(miRNA)                           # Calculate number of miRNA-mRNA pairs
+  corMatrix <- matrix(nrow = numberOfPairs, ncol = 7)                 # Initialise corMatix which will store all correlations
+  colnames(corMatrix) <- c("miRNA", "mRNA", "pearson-cor", "p-value", "conf.int L", "conf.int R","p-adjust")  # Set column names
   
   progress <- txtProgressBar(min = 0, max = numberOfPairs, initial = 0) # Initiate progress bar
   
+  print("Calculating miRNA-mRNA interactions, depeding on your data this can take a while...")
   step = 0 # Initialise step which will count total number of correlations made
-  for (i in 1:nrow(mirna.case)){
-    for (j in 1:nrow(mrna.case)){
+  for (i in 1:nrow(miRNA)){
+    for (j in 1:nrow(mRNA)){
       step = step + 1
       
       # Calculate pearson correlation
-      miRNA <- as.numeric(mirna.case[i,])                   # Load miRNA expression values
-      mRNA <- as.numeric(mrna.case[j,])                     # Load mRNA expression values
-      correlation <- stats::cor.test(miRNA,                 # Calculate miRNA-mRNA correlation
-                                     mRNA,
+      miRNA_val <- as.numeric(miRNA[i,])                   # Load miRNA expression values
+      mRNA_val <- as.numeric(mRNA[j,])                     # Load mRNA expression values
+      correlation <- stats::cor.test(miRNA_val,            # Calculate miRNA-mRNA correlation
+                                     mRNA_val,
                                      method = "pearson",
                                      use = "complete.obs")
       
       # Store correlation results
-      miRNA_name <- row.names(mirna)[i]                     # Load miRNA name
-      mRNA_name <- row.names(mrna)[j]                       # Load mRNA name
+      miRNA_name <- row.names(miRNA)[i]                     # Load miRNA name
+      mRNA_name <- row.names(mRNA)[j]                       # Load mRNA name
       corMatrix[step,] <- c(miRNA_name,                     # store results in corMatrix
                             mRNA_name,
                             correlation$estimate[[1]],
-                            correlation$p.value)
+                            correlation$p.value,
+                            correlation$conf.int[1:2],
+                            NA)
       
       
       setTxtProgressBar(progress, step)                     # Update progress bar
     }
   }
+  # Set column types as numeric
+  corMatrix_df <- as.data.frame(corMatrix)
+  corMatrix_df[,3:7] <- as.numeric(corMatrix[,3:7])
   
   # Correct for multiple testing (using the FDR method of Benjamini Hochberg)
-  corMatrix$"p.adjust" <- p.adjust(corMatrix$p.value, method = "BH")
+  corMatrix_df[,"p-adjust"] <- p.adjust(corMatrix_df[,"p-value"], method = "BH")
   
+  # Only take significnat correlation - without multiple testing
+  corMatrix_df_sign <- corMatrix_df[corMatrix_df[,"p-value"] <0.05,] # p<0.05
+  corMatrix_df_sign <- corMatrix_df_sign[corMatrix_df_sign[,"pearson-cor"] < -0.7 | corMatrix_df_sign[,"pearson-cor"] > 0.7,] 
   
-  return(corMatrix)
+  return(corMatrix_df_sign)
 }
 
-#========================================================================================================#
-# This function lookup miRNA targets from various databases using the targetHUB API                      #
-#                                                                                                        #
-# https://app1.bioinformatics.mdanderson.org/tarhub/_design/basic/index.html                             #
-#                                                                                                        #
-# miRBase: integrating microRNA annotation and deep-sequencing data.                                     #
-# Kozomara A, Griffiths-Jones S.                                                                         #
-# Nucleic Acids Res. 2011 39:D152-D157                                                                   #
-#========================================================================================================#
+#=========================================#
+##            Query Targets              ##
+#=========================================#
 miRNA_target_query_targetHUB <- function(mirna, mrna){
+  #========================================================================================================#
+  # This function lookup miRNA targets from various databases using the targetHUB API                      #
+  #                                                                                                        #
+  # https://app1.bioinformatics.mdanderson.org/tarhub/_design/basic/index.html                             #
+  #                                                                                                        #
+  # miRBase: integrating microRNA annotation and deep-sequencing data.                                     #
+  # Kozomara A, Griffiths-Jones S.                                                                         #
+  # Nucleic Acids Res. 2011 39:D152-D157                                                                   #
+  #========================================================================================================#
+  
   #==== miRNA version conversion - Currently not used!!! ===#
   miRNA_names <- row.names(mirna)                                       # Store miRNA names
   version = checkMiRNAVersion(row.names(mirna), verbose = TRUE)         # Check miRNA name version
@@ -143,11 +169,47 @@ miRNA_target_query_targetHUB <- function(mirna, mrna){
   }
 }
 
-miRNA_target_query_multiMiR <- function(miRNA.CHVC){ # Still have to implement other comparison groups
-  miRNA.targets.CHVC <- get_multimir(mirna = miRNA.CHVC$mirna.Name, summary = TRUE) # Query the miRNA targets
+#=========================================#
+##            miRNA Targets              ##
+#=========================================#
+miRNA.targets <- function(mRNA, miRNA, removeDuplicates = TRUE){
+  mirna.targets <- get_multimir(mirna = miRNA$mirna.Name, summary = TRUE)
+  targets.names <- data.frame(mRNA = mirna.targets@data$target_entrez, 
+                                   mirna = mirna.targets@data$mature_mirna_id,
+                                   source = mirna.targets@data$pubmed_id)
   
-  DEG.CHVC.names <- rownames(mrna.CHVC)
+  mRNA$mRNA <- rownames(mRNA)
+  targets.DEG <- merge(targets.names, mRNA, by = "mRNA", sort = FALSE)
+  targets.DEG <- targets.DEG[!duplicated(
+    targets.DEG[,c("mRNA", "mirna", "source")]),] # Remove duplicates from same publication
+  
+  if (removeDuplicates == TRUE){
+    targets.DEG[,"source"] <- 1
+    targets.DEG <- aggregate(source ~ mRNA + mirna, data = targets.DEG, sum)
+  }
+  
+  return(targets.DEG)
+}
+
+#=========================================#
+##              get multiMiR             ##
+#=========================================#
+
+miRNA_target_query_multiMiR <- function(miRNA.CHVC){ # Still have to implement other comparison groups
+  miRNA.targets.CHVC <- get_multimir(mirna = miRNA$mirna.Name, summary = TRUE) # Query the miRNA targets
+  
+  DEG.CHVC.names <- rownames(mRNA.CHVC)
   miRNA.targets.CHVC.DEG <- miRNA.targets.CHVC@data[miRNA.targets.CHVC@data[,"target_entrez"] %in% DEG.CHVC.names,]
   
   return(miRNA.targets.CHVC.DEG) 
+}
+
+#=========================================#
+##     find overlapping interactions     ##
+#=========================================#
+miRNA_target_overlap <- function(corMatrix, interactions){
+  interactions_overlap <- merge(interactions, corMatrix[,c("mRNA", "miRNA")],
+                                by.x = c("mRNA", "mirna"),
+                                by.y = c("mRNA", "miRNA"))
+  return(interactions_overlap)
 }

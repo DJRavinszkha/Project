@@ -9,23 +9,9 @@
 #          Stefan Meier, ID: I6114194 , Maastricht University                 #
 #=============================================================================#
 
-
-#=========================================#
-##         Install libraries             ##
-#=========================================#
-library(qvalue)
-library(limma)
-library(edgeR)
 #====================================#
-## Differential Expression Analysis ##
+##            Functions             ##
 #====================================#
-
-##Link from the PCA.R to here to identify whether we need batch corrections
-## Exploratroy PCA plots
-
-## Initilaise Batch effect correction before model
-## Set criteria for the q-values
-
 
 #====================================#
 ##  Function to initialise design   ##    #Note: Could use edgeR for miRNA and DESeq2 for miRNA
@@ -77,6 +63,7 @@ volcano <- function(fit.eb){
 #====================================#
 
 ##====Initialise Data from dataFormatting.R====##
+source("dataFormatting.R")
 Data <- format() #Remember to run dataFormatting.R first before initialising data
 mrna <- data.frame(Data[1]) #mRNA expression data (contains entrez ID as index)
 mirna <- data.frame(Data[2]) #miRNA expression data (contains miRNA name as index)
@@ -88,6 +75,7 @@ key <- data.frame(Data[4]) #entrezID to genesymbol key
 current_path <- getActiveDocumentContext()$path 
 setwd(dirname(current_path))
 source("PCA.R")
+
 
 
 #= Sample Groups =#
@@ -138,7 +126,7 @@ init.mRNA <- function(){
 }
 ##===== Drained Vs Control (DVC) =====##
 
-mRNA.DVC <- function(){
+mRNA_DVC <- function(){
   mrna.design <- init.mRNA()
   #= Contrasts =#
   contrasts.mrna.DVC = makeContrasts(drained_v_control = drained - control,
@@ -165,11 +153,11 @@ mRNA.DVC <- function(){
   #= Volcano =#
   volcano(fit.mrna.DVC)
   
-  return(mrna.DEG.DVC)
+  return(list(mrna.DEG.DVC, namesTop.mrna.DVC))
 }
 ##===== Cholestatic Vs Control (CHVC) =====##
 
-mRNA.CHVC <- function(){
+mRNA_CHVC <- function(){
   mrna.design <- init.mRNA()
   #= Contrasts =#
   contrasts.mrna.CHVC = makeContrasts(cholestasis_v_control = cholestasis - control,
@@ -192,23 +180,14 @@ mRNA.CHVC <- function(){
   mrna.DEG.CHVC <- data.frame(Gene.Symb=symb.mrna.CHVC, logFC= mrna.expressed.CHVC$logFC, adj.p= mrna.expressed.CHVC$adj.P.Val)
   rownames(mrna.DEG.CHVC)<- namesTop.mrna.CHVC
   
-  # #= Volcano =#
-  # volcano(fit.mrna.CHVC)
-  # 
-  # #= Heat Map =#
-  # mrna.DEG.CHVC$mRNA <- rownames(mrna.DEG.CHVC)
-  # mrna$mRNA <- rownames(mrna)
-  # mrna.heat.CHVC <- merge(mrna, mrna.DEG.CHVC, by = "mRNA", sort = FALSE)
-  # heatmap.2(as.matrix(unique(mrna.heat.CHVC[,2:29])), 
-  #           trace = "none", 
-  #           main="mRNA heatmap (CHVC)", 
-  #           labRow = mrna.heat.CHVC$Gene.Symb)
+  #= Volcano =#
+  volcano(fit.mrna.CHVC)
   
   return(list(mrna.DEG.CHVC, namesTop.mrna.CHVC))
 }
 ##===== Cholestatic Vs Drained (CHVD) =====##
   
-mRNA.CHVD <- function(){
+mRNA_CHVD <- function(){
   mrna.design <- init.mRNA()
   #= Contrasts =#
   contrasts.mrna.CHVD = makeContrasts(cholestasis_v_drained = cholestasis - drained,
@@ -233,17 +212,8 @@ mRNA.CHVD <- function(){
                              adj.p= mrna.expressed.CHVD$adj.P.Val)
   rownames(mrna.DEG.CHVD)<- namesTop.mrna.CHVD
   
-  # #= Volcano =#
-  # volcano(fit.mrna.CHVD)
-  # 
-  # #= Heat Map =#
-  # mrna.DEG.CHVD$mRNA <- rownames(mrna.DEG.CHVD)
-  # mrna$mRNA <- rownames(mrna)
-  # mrna.heat.CHVD <- merge(mrna, mrna.DEG.CHVD, by = "mRNA", sort = FALSE)
-  # heatmap.2(as.matrix(unique(mrna.heat.CHVD[,2:29])), 
-  #           trace = "none", 
-  #           main="mRNA heatmap (CHVD)", 
-  #           labRow = mrna.heat.CHVD$Gene.Symb)
+  #= Volcano =#
+  volcano(fit.mrna.CHVD)
   
   
   return(list(mrna.DEG.CHVD, namesTop.mrna.CHVD))
@@ -291,7 +261,7 @@ init.miRNA <- function(){
 }
 ##===== Drained Vs Control (DVC) =====##
 
-miRNA.DVC <- function(){
+miRNA_DVC <- function(){
   mirna.design <- init.miRNA()
   #= Contrasts =#
   contrasts.mirna.DVC = makeContrasts(drained_v_control = drained - control,
@@ -317,11 +287,12 @@ miRNA.DVC <- function(){
   #= Volcano =#
   volcano(fit.mirna.DVC)
   
-  return(mirna.DEG.DVC)
+  return(list(mirna.DEG.DVC, mirna.namesTop.DVC))
 }
 
 ##===== Cholestatic Vs Control (CHVC) =====##
-miRNA.CHVC <- function(){
+miRNA_CHVC <- function(){
+  
   mirna.design <- init.miRNA()
   #= Contrasts =#
   contrasts.mirna.CHVC = makeContrasts(cholestasis_v_control = cholestasis - control,
@@ -330,7 +301,7 @@ miRNA.CHVC <- function(){
   fit.mirna.CHVC <- fit.eb(mirna, mirna.design, contrasts.mirna.CHVC)
   
   #= Top Expressed =#
-  mirna.expressed.CHVC = top.expressed(fit.mirna.CHVC, 
+  mirna.expressed.CHVC <- top.expressed(fit.mirna.CHVC, 
                                        p.value=0.05, 
                                        number = nrow(mirna), 
                                        adjust = "BH")
@@ -342,16 +313,17 @@ miRNA.CHVC <- function(){
   mirna.DEG.CHVC<- data.frame(mirna.Name = mirna.namesTop.CHVC,
                               logFC= mirna.expressed.CHVC$logFC, 
                               adj.p= mirna.expressed.CHVC$adj.P.Val)
+  
   rownames(mirna.DEG.CHVC) <- mirna.namesTop.CHVC
  
   #= Volcano =#
   volcano(fit.mirna.CHVC)
   
-  return(mirna.DEG.CHVC)
+  return(list(mirna.DEG.CHVC, mirna.namesTop.CHVC))
 }
 
 ##===== Cholestatic Vs Drained (CHVD) =====##
-miRNA.CHVD <- function(){
+miRNA_CHVD <- function(){
   mirna.design <- init.miRNA()
   #= Contrasts =#
   contrasts.mirna.CHVD = makeContrasts(cholestasis_v_drained = cholestasis - drained,
@@ -369,7 +341,7 @@ miRNA.CHVD <- function(){
   mirna.namesTop.CHVD<-rownames(mirna.expressed.CHVD)
   
   #= Create Dataframe =#
-  mirna.DEG.CHVD<- data.frame(Gene.Symb=mirna.namesTop.CHVD,
+  mirna.DEG.CHVD<- data.frame(mirna.Name = mirna.namesTop.CHVD,
                               logFC= mirna.expressed.CHVD$logFC, 
                               adj.p= mirna.expressed.CHVD$adj.P.Val)
   rownames(mirna.DEG.CHVD)<- mirna.namesTop.CHVD
@@ -377,17 +349,9 @@ miRNA.CHVD <- function(){
   #= Volcano =#
   volcano(fit.mirna.CHVD)
   
-  return(mirna.DEG.CHVD)
+  return(list(mirna.DEG.CHVD, mirna.namesTop.CHVD))
 }
 
-##===== Plots =====##
-#= Dendrogram =#
-
-
-# current_path <- getActiveDocumentContext()$path 
-# setwd(dirname(current_path ))
-# targets = read.delim('../Data/miRNA_targets.csv', sep = ",", check.names = FALSE) #Load expression data
-# mirna.DEG.CHVC$miRNA <- rownames(mirna.DEG.CHVC)
 
 
 
