@@ -8,11 +8,6 @@
 #          Ravin Schmidl, ID: I6125866, Maastricht University                 #
 #          Stefan Meier, ID: I6114194 , Maastricht University                 #
 #=============================================================================#
-#=========================================#
-##         Install libraries             ##
-#=========================================#
-library(limma)
-library(rstudioapi)
 
 #===================#
 ## Data Formatting ##
