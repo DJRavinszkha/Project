@@ -3,7 +3,7 @@
 #	Expression Analysis                                                         #
 # Version: 1.0   															                                #
 # Date: 9-1-2020											             	                          #
-# Authors: Ariadna Fosch i MuntanÃ©, ID: I6215203, Maastricht University       #
+# Authors: Ariadna Fosch i Muntané, ID: I6215203, Maastricht University       #
 #          Jip de Kok, ID: I6119367 , Maastricht University                   #
 #          Ravin Schmidl, ID: I6125866, Maastricht University                 #
 #          Stefan Meier, ID: I6114194 , Maastricht University                 #
@@ -14,8 +14,9 @@
 #=========================================#
 
 GO <- function(p, #mrna.DEG.CHVC$adj.P
-               names){
-  allGO2genes <-annFUN.org(whichOnto = "BP", 
+               names, 
+               Onto){
+  allGO2genes <-annFUN.org(whichOnto = Onto, 
                            feasibleGenes = NULL, 
                            mapping = "org.Hs.eg.db", 
                            ID = "entrez")
@@ -23,23 +24,26 @@ GO <- function(p, #mrna.DEG.CHVC$adj.P
   all <- p
   names(all)<-names
   
-    
+  
   GO <- new("topGOdata", 
-            ontology = "BP",
+            ontology = Onto,
             allGenes = all,
             annot = annFUN.GO2genes,
             geneSel = function(x)x,
             GO2genes = allGO2genes,
             nodeSize = 10
-            )
-
+  )
+  
   print(GO)
   return(GO)
 }
 
 plotGO <- function(GO, 
                    show, #number of topNodes to be shown
-                   title
+                   title,
+                   save = TRUE,
+                   main_Title,
+                   lab
 ){
   
   results.ks <- runTest(GO, algorithm = "classic", statistic = "ks")
@@ -54,29 +58,33 @@ plotGO <- function(GO,
   goEnrichment$Term <- factor(goEnrichment$Term, levels = rev(goEnrichment$Term))
   goEnrichment$KS <- as.numeric(goEnrichment$KS)
   
-  
-  plot <- ggplot(goEnrichment, aes(x = Term, y = -log10(KS))) +
+  goplot <- ggplot(goEnrichment, aes(x = Term, y = -log10(KS))) +
     stat_summary(geom = "bar", fun.y = mean, position = "dodge") +
-    xlab("Biological process") +
-    ylab("Enrichment") +
+    xlab(lab) +
+    ylab("Enrichment (-Log10(pValue))") +
     ggtitle(title) +
     scale_y_continuous(breaks = round(seq(0, max(-log10(goEnrichment$KS)), by = 2), 1)) +
     theme_bw(base_size = 24) +
     theme(
       legend.position='none',
       legend.background=element_rect(),
-      plot.title=element_text(angle = 0, size = 24, face="bold", vjust = 1),
-      axis.text.x=element_text(angle = 0, size = 18, face="bold", hjust = 1.10),
-      axis.text.y=element_text(angle = 0, size = 18, face = "bold", vjust = 0.5),
-      axis.title=element_text(size = 24, face = "bold"),
+      plot.title=element_text(angle = 0, size = 36, face="bold", vjust = 1),
+      axis.text.x=element_text(angle = 0, size = 32, face="bold", hjust = 1.10),
+      axis.text.y=element_text(angle = 0, size = 32, face = "bold", vjust = 0.5),
+      axis.title=element_text(size = 40, face = "bold"),
       legend.key=element_blank(),     #removes the border
       legend.key.size=unit(1, "cm"),      #Sets overall area/size of the legend
-      legend.text=element_text(size = 18),  #Text size
-      title=element_text(size = 18)) +
+      legend.text=element_text(size = 32),  #Text size
+      title=element_text(size = 32)) +
     guides(colour=guide_legend(override.aes=list(size = 2.5))) +
     coord_flip()
   
-  print(plot)
+  if(save){
+    ggsave(main_Title, plot = goplot, path = "../Figures/", 
+           width = 640, height = 480, units = "mm")
+    # dev.off()
+  }
+  print(goplot)
   return(list(results.ks, enrichment))
 }
 
@@ -105,26 +113,44 @@ GO.adj.mat <-function(GO, DEG){
 ##              get_GO                   ##
 #=========================================#
 
-get_GO <- function(mRNA, mirna.targets, use_target = TRUE, prefix){
+get_GO <- function(mRNA, 
+                   mirna.targets, 
+                   use_target = TRUE, 
+                   prefix, 
+                   title,
+                   Onto,
+                   save = TRUE,
+                   main_Title,
+                   lab){
   if(use_target){ 
     #miRNA
     uniqueMirna.targets <- mirna.targets[!duplicated(mirna.targets$mRNA),]
     
-    GO <- GO(uniqueMirna.targets$adj.p, uniqueMirna.targets$mRNA)
+    GO <- GO(uniqueMirna.targets$adj.p, 
+             uniqueMirna.targets$mRNA, Onto)
+    
     A <- plotGO(GO, 
-                        20, 
-                        "mRNA2: GO enrichment Cholestatic vs Control"
-                        )
+                20, 
+                title,
+                save,
+                main_Title,
+                lab
+    )
     result.ks <- A[[1]]
     enrichment <- A[[2]]
     
   } else {
     #mRNA
-    GO <- GO(mRNA[[1]]$adj.p, mRNA[[2]])
+    GO <- GO(mRNA[[1]]$adj.p, 
+             mRNA[[2]], Onto)
+    
     A <- plotGO(GO, 
-                         20, 
-                         "mRNA1: GO enrichment Cholestatic vs Drained"
-                         )
+                20, 
+                title,
+                save,
+                main_Title,
+                lab
+    )
     result.ks <- A[[1]]
     enrichment <- A[[2]]
   }
@@ -135,7 +161,7 @@ get_GO <- function(mRNA, mirna.targets, use_target = TRUE, prefix){
              fn.prefix = prefix,
              useInfo = "all", 
              pdfSW = TRUE
-             )
+  )
   return(list(GO, result.ks, enrichment))
   
 }
@@ -147,8 +173,8 @@ get_GO <- function(mRNA, mirna.targets, use_target = TRUE, prefix){
 longFormat.Enrichment <- function(GO, 
                                   mRNA,
                                   enrichment
-                                  ){
-  adj.mat <- GO.adj.mat(GO , mRNA) 
+){
+  adj.mat <- GO.adj.mat(GO, mRNA) 
   data_long <- melt(adj.mat) # change data to format long
   colnames(data_long)<- c("ids","GO.id","values")
   data.long <- data_long[data_long[,3] != 0,]
@@ -159,6 +185,3 @@ longFormat.Enrichment <- function(GO,
   
   return(output)
 }
-  
-
-

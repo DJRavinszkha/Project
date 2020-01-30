@@ -16,7 +16,10 @@
 #================================#
 ##        General Network       ##
 #================================#
-generate_network_data <- function(data, contains_genes = FALSE){
+generate_network_data <- function(data,
+                                  contains_genes = FALSE,
+                                  group1 = "mRNA",
+                                  group2 = "miRNA"){
   #========================================================================================================#
   # This function converts data into two datasets required for visualising a network                       #
   #                                                                                                        #
@@ -38,25 +41,24 @@ generate_network_data <- function(data, contains_genes = FALSE){
     source_ID <- matrix(ncol = 5, nrow = length(names))   # Initialise ID matrix
     source_ID[,2] <- as.character(names)                  # Get all unqiue source names
     source_ID[,1] <- seq(0,length(names) - 1)             # Create the ID's
-    source_ID[,3] <- 1                                    # Set group to Source
+    source_ID[,3] <- group1                               # Set group to Source
     colnames(source_ID) <- c("ID", "name", "Group", "Symbol", "Genename")   # Create column names
   } else {
     names <- unique(data[,1])
     source_ID <- matrix(ncol = 3, nrow = length(names))   # Initialise ID matrix
     source_ID[,2] <- as.character(names)                  # Get all unqiue source names
     source_ID[,1] <- seq(0,length(names) - 1)             # Create the ID's
-    source_ID[,3] <- 1                                    # Set group to Source
+    source_ID[,3] <- group1                               # Set group to Source
     colnames(source_ID) <- c("ID", "name", "Group")       # Create column names
   }
   
   # Create Target ID's
   names <- unique(data[,2])
-  target_ID <- matrix(ncol = 3, nrow = length(names))   # Initialise ID matrix
-  target_ID[,2] <- as.character(names)                                # Get all unqiue source names
-  target_ID[,1] <- seq(nrow(source_ID), nrow(source_ID) + length(names) - 1)             # Create the ID's
-  target_ID[,3] <- 2                                    # Set group to Target
-  colnames(target_ID) <- c("ID", "name", "Group")       # Create column names
-  
+  target_ID <- matrix(ncol = 3, nrow = length(names))                         # Initialise ID matrix
+  target_ID[,2] <- as.character(names)                                        # Get all unqiue source names
+  target_ID[,1] <- seq(nrow(source_ID), nrow(source_ID) + length(names) - 1)  # Create the ID's
+  target_ID[,3] <- group2                                                     # Set group to Target
+  colnames(target_ID) <- c("ID", "name", "Group")                             # Create column names
   
   # Replace entrezIDs with genenames in the Source_ID
   if (contains_genes == TRUE){
@@ -80,14 +82,15 @@ generate_network_data <- function(data, contains_genes = FALSE){
   if (contains_genes == TRUE){
     network_node <- data.frame(do.call(rbind,
                                        list(source_ID[,c("ID", "Symbol", "Group")],
-                                            target_ID))) # Create node data by stacking the two ID matrices on top of eachother
+                                            target_ID)))            # Create node data by stacking the two ID matrices on top of eachother
     network_node[,4] <- NA
     network_node[1:nrow(source_ID),4] <- source_ID[,"Genename"]
-    colnames(network_node) <- c("ID", "Name", "Group", "Genename")
+    colnames(network_node) <- c("ID", "Name", "Group", "Genename")  # Set correct column names
   } else {
     network_node <- data.frame(do.call(rbind,
                                        list(source_ID,
-                                            target_ID))) # Create node data by stacking the two ID matrices on top of eachother
+                                            target_ID)))            # Create node data by stacking the two ID matrices on top of eachother
+    colnames(network_node) <- c("ID", "Name", "Group")              # Set correct column names
     
   }
   # Calculate node degrees
@@ -126,18 +129,18 @@ miRNA_mRNA_interaction_network <- function(mRNA,
   
   # Create miRNA ID's
   IDs <- unique(network_data[,"mirna"])
-  miRNA_ID <- matrix(ncol = 3, nrow = length(IDs))
+  miRNA_ID <- matrix(ncol = 5, nrow = length(IDs))
   miRNA_ID[,2] <- as.character(IDs)                               # Get all unqiue miRNA names
   miRNA_ID[,1] <- seq(0,length(IDs) - 1)
-  miRNA_ID[,3] <- 1
-  colnames(miRNA_ID) <- c("ID", "name", "Group")
+  miRNA_ID[,3] <- "miRNA"
+  colnames(miRNA_ID) <- c("ID", "name", "Group", "Symbol", "Genename")
   
   # Create mRNA ID's
   IDs <- unique(network_data[,"mRNA"])
   mRNA_ID <- matrix(ncol = 3, nrow = length(IDs))
   mRNA_ID[,2] <- as.character(IDs)                               # Get all unqiue miRNA names
   mRNA_ID[,1] <- seq(nrow(miRNA_ID),nrow(miRNA_ID) + length(IDs) - 1)
-  mRNA_ID[,3] <- 2
+  mRNA_ID[,3] <- "mRNA"
   colnames(mRNA_ID) <- c("ID", "name", "Group")
   
   
@@ -172,14 +175,23 @@ miRNA_mRNA_interaction_network <- function(mRNA,
 
 visualise_network <- function(network_link, 
                               network_node, 
-                              silent = TRUE){
+                              silent = TRUE,
+                              nodeSizeDiff = 0.5,
+                              edgeWidth = 3,
+                              nameVisiblity = 0,
+                              width = NULL,
+                              height = NULL,
+                              bounded = FALSE,
+                              force = -30,
+                              linkDistance = 150,
+                              saveName = "interaction_network.html"){
   
   MyClickScript <- 
     'alert(Object.getOwnPropertyNames(d));'
   
   MyClickScript <-   'alert("You clicked " + d.name + " which has a degree of: " + d.nodesize);'
   
-  nodeSize <- networkD3::JS("function(input) { return d.value * 2; }")
+  nodeSize <- sprintf("Math.pow(d.nodesize, %f) + 4", nodeSizeDiff)
   
   miRNA_interaction_network <- forceNetwork(Links   = network_link,
                                             Nodes   = network_node,
@@ -189,19 +201,23 @@ visualise_network <- function(network_link,
                                             Group   = "Group",
                                             Value   = "Value",
                                             Nodesize = "nodeDegree",
-                                            radiusCalculation = "Math.pow(d.nodesize, 0.95) + 4",
+                                            radiusCalculation = nodeSize,
                                             opacity = 0.95,
                                             zoom    = TRUE,
                                             fontSize = 20,
                                             clickAction = MyClickScript,
                                             colourScale = JS("d3.scaleOrdinal(d3.schemeCategory10);"),
                                             legend = TRUE,
-                                            linkWidth = 3,
-                                            opacityNoHover = 0.5,
-                                            linkDistance = 150
+                                            linkWidth = edgeWidth,
+                                            opacityNoHover = nameVisiblity,
+                                            linkDistance = linkDistance,
+                                            height = height,
+                                            width = width,
+                                            bounded = bounded,
+                                            charge = force
                                             )
   
-  saveNetwork(miRNA_interaction_network, "miRNA_interaction_network.html")
+  saveNetwork(miRNA_interaction_network, saveName)
   
   if(!silent){
     print(miRNA_interaction_network)

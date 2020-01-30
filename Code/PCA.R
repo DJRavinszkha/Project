@@ -3,7 +3,7 @@
 #	Data Formatting                                                             #
 # Version: 1.0   															                                #
 # Date: 9-1-2020											             	                          #
-# Authors: Ariadna Fosch i MuntanÃ©, ID: I6215203, Maastricht University       #
+# Authors: Ariadna Fosch i Muntané, ID: I6215203, Maastricht University       #
 #          Jip de Kok, ID: I6119367 , Maastricht University                   #
 #          Ravin Schmidl, ID: I6125866, Maastricht University                 #
 #          Stefan Meier, ID: I6114194 , Maastricht University                 #
@@ -33,7 +33,7 @@ mrna.treatmentOrder <- matrix(nrow = (ncol(mrna)), ncol = 1)
 colnames(mrna.treatmentOrder) <- "sampleName"
 mrna.treatmentOrder[,1] <- colnames(mrna)
 mrna.treatmentOrder <- merge(mrna.treatmentOrder, sampleGroups, by = "sampleName", sort = FALSE)
- 
+
 
 # Get treatment order mirna
 mirna.treatmentOrder <- matrix(nrow = (ncol(mirna)), ncol = 1)
@@ -59,7 +59,10 @@ PCA <- function(data,
                 treat, 
                 data.batch, 
                 title1, 
-                title2){
+                title2, 
+                main_Title, 
+                save = TRUE
+) {
   #Usage:
   #   PCA(mirna, 
   #       mirna.treatmentOrder$treatment, 
@@ -68,6 +71,10 @@ PCA <- function(data,
   #       "miRNA pca coloured by Treatment", 
   #       "miRNA pca coloured by Batch"
   #   )
+  #=  miRNA corrected  =#
+  
+  
+  #= PCA =#
   pcaRes_data <- pca(t(data),nPcs = 10)  # perform PCA
   data.PCA <- data.frame(c(pcaRes_data@scores[,1]),
                          pcaRes_data@scores[,2],
@@ -75,7 +82,7 @@ PCA <- function(data,
                          pcaRes_data@scores[,4],
                          pcaRes_data@scores[,5],
                          treat = data.treatmentOrder) 
-  colnames(data.PCA) = c("PCA1", "PCA2", "PCA3","PCA4", "PCA5","treat")
+  colnames(data.PCA) = c("PC1", "PC2", "PC3","PC4", "PC5","treat")
   
   if(treat != 0){ 
     #need this if loop because we either use a value generated in function for x (as in PCA for mRNA and miRNA)
@@ -87,31 +94,31 @@ PCA <- function(data,
     Treatment = data.PCA$treat
   }
   ##==== Colouring by treatment ====##
-  plot1 <- ggplot(data.PCA, aes(x = PCA1, y = PCA2)) +
-    geom_point(aes(colour = Treatment)) +
+  plot1 <- ggplot(data.PCA, aes(x = PC1, y = PC2)) +
+    geom_point(aes(colour = Treatment), size = 5) +
     scale_colour_manual(values = c("#04179b", "#da9e00", "#198c19"),
-                        aesthetics = "fill") + theme_light() + 
-    ggtitle(title1)
+                        aesthetics = "fill") + theme_light(base_size = 20) + 
+    ggtitle("miRNA Corrected PCA Coloured by Treatment") 
+  
   
   ##==== Colouring by batch ====##
-  plot2 <- ggplot(data.PCA, aes(x = PCA1, y = PCA2)) +
-    geom_point(aes(colour = data.batch)) +
+  plot2 <- ggplot(data.PCA, aes(x = PC1, y = PC2)) +
+    geom_point(aes(colour = data.batch), size = 5) +
     scale_colour_manual(values = c("#04179b", "#da9e00", "#198c19"),
-                        aesthetics = "fill") + theme_light() + 
-    ggtitle(title2)
+                        aesthetics = "fill") + theme_light(base_size = 20) + 
+    ggtitle("miRNA Corrected PCA Coloured by Batch")
+  final_Plot <- plot_grid(plot1, plot2, labels = "AUTO")
   
-  ## !!!!!!! ## 
-  #install.packages("cowplot") ## !!!!!! ## <<<<<------ need to install
-  library(cowplot)
-  plot_grid(plot1, plot2, labels = "AUTO")
-  
-  
+  if(save){
+    ggsave(main_Title, plot = final_Plot, path = "../Figures/", dpi = 300)
+    
+  }
 }
 
 #=========================#
 ## 3. PCA for mRNA DATA  ## 
 #=========================#
-PCA.mrna <- function(){
+PCA.mrna <- function(main_Title, save = TRUE){
   # Notes: 1. Batch_number_mrna changed to mrna.batches
   #        2. Batch_num changed to batch
   #        3. PCA_mrna changed to mrna.PCA
@@ -119,12 +126,15 @@ PCA.mrna <- function(){
   #MRNA for 28 samples
   mrna[is.na(mrna)] <- NA # change Nan to NA
   plot <- PCA(mrna, #data
-        mrna.treatmentOrder$treatment, #treatment order
-        0, #treatment color
-        mrna.batches$batch, #batch color
-        "mRNA pca coloured by Treatment", #title1 
-        "mRNA pca coloured by Batch"#title2
-       ) 
+              mrna.treatmentOrder$treatment, #treatment order
+              0, #treatment color
+              mrna.batches$batch, #batch color
+              "mRNA pca coloured by Treatment", #title1 
+              "mRNA pca coloured by Batch",#title2
+              main_Title, 
+              save = save
+  ) 
+  
   return(plot)
 }
 #=========================#
@@ -135,16 +145,19 @@ PCA.mrna <- function(){
 #        3. PCA_mirna changed to mirna.PCA
 #        4. Treatment changed to treatment
 
-PCA.mirna <- function() {
+PCA.mirna <- function(main_Title, save = TRUE) {
   
   mirna[is.na(mirna)] <- NA # change Nan to NA
   plot <- PCA(mirna, #data
-        mirna.treatmentOrder$treatment, #treatment order
-        0, #treatment color
-        mirna.batches$batch, #batch color
-        "miRNA pca coloured by Treatment",#title1
-        "miRNA pca coloured by Batch" #title2
-        )
+              mirna.treatmentOrder$treatment, #treatment order
+              0, #treatment color
+              mirna.batches$batch, #batch color
+              "miRNA pca coloured by Treatment",#title1
+              "miRNA pca coloured by Batch", #title2
+              main_Title, 
+              save = save
+  )
+  
   return(plot)
 }
 #================#
@@ -205,14 +218,14 @@ PCA.mirna <- function() {
 mrna.Anova <- function(){
   mrna.means <- data.frame(means= rowMeans(t(mrna),na.rm = TRUE))
   mrna.Anova <- aov(mrna.means[,1]~mrna.batches[,1])
-  TukeyHSD(mrna.Anova, ordered = FALSE, conf.level = 0.95)
+  mrna.Tukey <- TukeyHSD(mrna.Anova, ordered = FALSE, conf.level = 0.95)
 }
 
 # Anova Testing miRna
 mirna.Anova <- function(){
   mirna.means <- data.frame(means= rowMeans(t(mirna),na.rm = TRUE))
-  mirna.Anova<- aov(mirna.means[,1]~mirna.batches[,1])
-  TukeyHSD(mirna.Anova, ordered = FALSE, conf.level = 0.95)
+  mirna.Anova <- aov(mirna.means[,1]~mirna.batches[,1])
+  mirna.Tukey <- TukeyHSD(mirna.Anova, ordered = FALSE, conf.level = 0.95)
 }
 #The anova shows that the mirna doesn't need correction as there is no significant batch variance
 
@@ -222,23 +235,37 @@ mirna.Anova <- function(){
 
 
 # Correction boxplot
-mrna.boxPlot <- function(){
+mrna.boxPlot <- function(save = TRUE, title){
   mrna.corrected <- removeBatchEffect(mrna, batch = factor(mrna.batches$batch.id))
   boxplot(as.data.frame(mrna),main="Original")
   boxplot(as.data.frame(mrna.corrected),main="Batch corrected")
+  
+  if(save){
+    pdf(title)
+    boxplot(as.data.frame(mrna),main="Original")
+    boxplot(as.data.frame(mrna.corrected),main="Batch corrected")
+    dev.off()
+  }
 }
 # remove batch effects mirna: NOT NECESSARY
-mirna.boxPlot <- function(){
+mirna.boxPlot <- function(save = TRUE, title){
   mirna.corrected <- removeBatchEffect(mirna, batch = factor(mirna.batches$batch.id))
   boxplot(as.data.frame(mirna),main="Original miRNA")
   boxplot(as.data.frame(mirna.corrected),main="Batches miRNA corrected")
+  
+  if(save){
+    pdf(title)
+    boxplot(as.data.frame(mirna),main="Original miRNA")
+    boxplot(as.data.frame(mirna.corrected),main="Batches miRNA corrected")
+    dev.off()
+  }
 }
 #=============================#
 ## 9. PCA for corrected data ##
 #=============================#
 
 ##====  mRNA corrected  ====##
-PCA.mrnaCorrected <- function(){
+PCA.mrnaCorrected <- function(main_Title, save = TRUE){
   
   #=  mRNA corrected  =#
   mrna[is.na(mrna)] <- NA # change Nan to NA
@@ -246,32 +273,36 @@ PCA.mrnaCorrected <- function(){
   
   #= PCA =#
   plot <- PCA(mrna.corrected, #data
-        mrna.batches$batch, #batch order
-        mrna.treatmentOrder$treatment, #treatment color
-        mrna.batches$batch, #batch color
-        "mRNA corrected pca coloured by Treatment",  #title1
-        "mRNA corrected pca coloured by Batch" #title2
-        )
+              mrna.batches$batch, #batch order
+              mrna.treatmentOrder$treatment, #treatment color
+              mrna.batches$batch, #batch color
+              "mRNA corrected pca coloured by Treatment",  #title1
+              "mRNA corrected pca coloured by Batch", #title2
+              main_Title, 
+              save = save
+  )
   return(plot)
 }
 ##====  miRNA corrected  ====##
-PCA.mirnaCorrected <- function(){
- 
+PCA.mirnaCorrected <- function(main_Title, save = save){
+  
   #=  miRNA corrected  =#
   mirna[is.na(mirna)] <- NA # change Nan to NA
   mirna.corrected <- removeBatchEffect(mirna, batch = factor(mirna.batches$batch.id)) 
   
   #= PCA =#
   plot <- PCA(mirna.corrected, #data
-      mirna.batches$batch, #batch order
-      mirna.treatmentOrder$treatment, #treatment color
-      mirna.batches$batch, #batch color
-      "miRNA corrected pca coloured by Treatment",  #title1
-      "miRNA corrected pca coloured by Batch" #title2
-      )
+              mirna.batches$batch, #batch order
+              mirna.treatmentOrder$treatment, #treatment color
+              mirna.batches$batch, #batch color
+              "miRNA corrected pca coloured by Treatment",  #title1
+              "miRNA corrected pca coloured by Batch", #title2
+              main_Title, 
+              save = save
+  )
   return(plot)
 }
-  
+
 # Interbatch variability was very high before the coorection. This didn't allow us to see the 
 # Intrabatch variability. After the correction all batches are more similar and we can see the
 # intrabatch variability.

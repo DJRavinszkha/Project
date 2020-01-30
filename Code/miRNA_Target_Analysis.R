@@ -169,9 +169,9 @@ miRNA_target_query_targetHUB <- function(mirna, mrna){
   }
 }
 
-#=========================================#
-##            miRNA Targets              ##
-#=========================================#
+#================================================#
+##       Query miRNA Targets with multiMiR      ##
+#================================================#
 miRNA.targets <- function(mRNA, miRNA, removeDuplicates = TRUE){
   mirna.targets <- get_multimir(mirna = miRNA$mirna.Name, summary = TRUE)
   targets.names <- data.frame(mRNA = mirna.targets@data$target_entrez, 
@@ -189,19 +189,6 @@ miRNA.targets <- function(mRNA, miRNA, removeDuplicates = TRUE){
   }
   
   return(targets.DEG)
-}
-
-#=========================================#
-##              get multiMiR             ##
-#=========================================#
-
-miRNA_target_query_multiMiR <- function(miRNA.CHVC){ # Still have to implement other comparison groups
-  miRNA.targets.CHVC <- get_multimir(mirna = miRNA$mirna.Name, summary = TRUE) # Query the miRNA targets
-  
-  DEG.CHVC.names <- rownames(mRNA.CHVC)
-  miRNA.targets.CHVC.DEG <- miRNA.targets.CHVC@data[miRNA.targets.CHVC@data[,"target_entrez"] %in% DEG.CHVC.names,]
-  
-  return(miRNA.targets.CHVC.DEG) 
 }
 
 #=========================================#

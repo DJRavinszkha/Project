@@ -115,8 +115,8 @@ init.mRNA <- function(){
   
   ##==== mRNA Design Matrix ====##
   colnames.mrnaDesign <- c("cholestasis", "drained", "control",
-                        "batch2","batch3","batch4", "batch5",
-                        "sex","age")
+                           "batch2","batch3","batch4", "batch5",
+                           "sex","age")
   mrna.design <- design(~0 + factor(labels$treatment.id) + factor(labels$mRNA.batch.id) + sex + age,
                         list(state=contrasts(state, contrasts=TRUE)),
                         contrasts(batch, contrasts = TRUE),
@@ -126,19 +126,19 @@ init.mRNA <- function(){
 }
 ##===== Drained Vs Control (DVC) =====##
 
-mRNA_DVC <- function(){
+mRNA_DVC <- function(save = TRUE){
   mrna.design <- init.mRNA()
   #= Contrasts =#
   contrasts.mrna.DVC = makeContrasts(drained_v_control = drained - control,
-                             levels = mrna.design)
+                                     levels = mrna.design)
   #= Linear Model =#
   fit.mrna.DVC <- fit.eb(mrna, mrna.design, contrasts.mrna.DVC)
   
   #= Top Expressed =#
   mrna.expressed.DVC = top.expressed(fit.mrna.DVC, 
-                                    p.value=0.05, 
-                                    number = nrow(mrna), 
-                                    adjust = "BH")
+                                     p.value=0.05, 
+                                     number = nrow(mrna), 
+                                     adjust = "BH")
   
   #= Identify Gene Symbols =#
   namesTop.mrna.DVC <-rownames(mrna.expressed.DVC)
@@ -151,26 +151,32 @@ mRNA_DVC <- function(){
   rownames(mrna.DEG.DVC)<- namesTop.mrna.DVC
   
   #= Volcano =#
-  volcano(fit.mrna.DVC)
+  if(save){
+    pdf("../Figures/Volcano_mRNA_DVC.pdf")
+    volcano(fit.mrna.DVC)
+    dev.off()
+  } else {
+    volcano(fit.mrna.DVC)
+  }
   
   return(list(mrna.DEG.DVC, namesTop.mrna.DVC))
 }
 ##===== Cholestatic Vs Control (CHVC) =====##
 
-mRNA_CHVC <- function(){
+mRNA_CHVC <- function(save = TRUE){
   mrna.design <- init.mRNA()
   #= Contrasts =#
   contrasts.mrna.CHVC = makeContrasts(cholestasis_v_control = cholestasis - control,
-                              levels = mrna.design)
+                                      levels = mrna.design)
   
   #= Fit =#
   fit.mrna.CHVC <- fit.eb(mrna, mrna.design, contrasts.mrna.CHVC)
   
   #= Top Expressed =#
   mrna.expressed.CHVC = top.expressed(fit.mrna.CHVC, 
-                                     p.value=0.05, 
-                                     number = nrow(mrna), 
-                                     adjust = "BH")
+                                      p.value=0.05, 
+                                      number = nrow(mrna), 
+                                      adjust = "BH")
   
   #= Identify Gene Symbols =#
   namesTop.mrna.CHVC<-rownames(mrna.expressed.CHVC)
@@ -181,26 +187,32 @@ mRNA_CHVC <- function(){
   rownames(mrna.DEG.CHVC)<- namesTop.mrna.CHVC
   
   #= Volcano =#
-  volcano(fit.mrna.CHVC)
+  if(save){
+    pdf("../Figures/Volcano_mRNA_CHVC.pdf")
+    volcano(fit.mrna.CHVC)
+    dev.off()
+  } else {
+    volcano(fit.mrna.CHVC)
+  }
   
   return(list(mrna.DEG.CHVC, namesTop.mrna.CHVC))
 }
 ##===== Cholestatic Vs Drained (CHVD) =====##
-  
-mRNA_CHVD <- function(){
+
+mRNA_CHVD <- function(save = TRUE){
   mrna.design <- init.mRNA()
   #= Contrasts =#
   contrasts.mrna.CHVD = makeContrasts(cholestasis_v_drained = cholestasis - drained,
-                              levels = mrna.design)
+                                      levels = mrna.design)
   
   #= Fit =#
   fit.mrna.CHVD <- fit.eb(mrna, mrna.design, contrasts.mrna.CHVD)
   
   #= Top Expressed =#
   mrna.expressed.CHVD = top.expressed(fit.mrna.CHVD,
-                                     p.value=0.05, 
-                                     number = nrow(mrna), 
-                                     adjust = "BH")
+                                      p.value=0.05, 
+                                      number = nrow(mrna), 
+                                      adjust = "BH")
   
   #= Identify Gene Symbol =#
   namesTop.mrna.CHVD<-rownames(mrna.expressed.CHVD)
@@ -213,7 +225,13 @@ mRNA_CHVD <- function(){
   rownames(mrna.DEG.CHVD)<- namesTop.mrna.CHVD
   
   #= Volcano =#
-  volcano(fit.mrna.CHVD)
+  if(save){
+    pdf("../Figures/Volcano_mRNA_CHVD.pdf")
+    volcano(fit.mrna.CHVD)
+    dev.off()
+  } else {
+    volcano(fit.mrna.CHVD)
+  }
   
   
   return(list(mrna.DEG.CHVD, namesTop.mrna.CHVD))
@@ -261,11 +279,11 @@ init.miRNA <- function(){
 }
 ##===== Drained Vs Control (DVC) =====##
 
-miRNA_DVC <- function(){
+miRNA_DVC <- function(save = TRUE){
   mirna.design <- init.miRNA()
   #= Contrasts =#
   contrasts.mirna.DVC = makeContrasts(drained_v_control = drained - control,
-                                   levels = mirna.design)
+                                      levels = mirna.design)
   #= Fit =#
   fit.mirna.DVC <- fit.eb(mirna, mirna.design, contrasts.mirna.DVC)
   
@@ -285,26 +303,31 @@ miRNA_DVC <- function(){
   rownames(mirna.DEG.DVC)<- mirna.namesTop.DVC 
   
   #= Volcano =#
-  volcano(fit.mirna.DVC)
+  if(save){
+    pdf("../Figures/Volcano_miRNA_DVC.pdf")
+    volcano(fit.mirna.DVC)
+    dev.off()
+  } else {
+    volcano(fit.mirna.DVC)
+  }
   
   return(list(mirna.DEG.DVC, mirna.namesTop.DVC))
 }
 
 ##===== Cholestatic Vs Control (CHVC) =====##
-miRNA_CHVC <- function(){
-  
+miRNA_CHVC <- function(save = TRUE){
   mirna.design <- init.miRNA()
   #= Contrasts =#
   contrasts.mirna.CHVC = makeContrasts(cholestasis_v_control = cholestasis - control,
-                                    levels = mirna.design)
+                                       levels = mirna.design)
   #= Fit =#
   fit.mirna.CHVC <- fit.eb(mirna, mirna.design, contrasts.mirna.CHVC)
   
   #= Top Expressed =#
   mirna.expressed.CHVC <- top.expressed(fit.mirna.CHVC, 
-                                       p.value=0.05, 
-                                       number = nrow(mirna), 
-                                       adjust = "BH")
+                                        p.value=0.05, 
+                                        number = nrow(mirna), 
+                                        adjust = "BH")
   
   #= Identify Gene Symbol =#
   mirna.namesTop.CHVC <- rownames(mirna.expressed.CHVC)
@@ -315,27 +338,34 @@ miRNA_CHVC <- function(){
                               adj.p= mirna.expressed.CHVC$adj.P.Val)
   
   rownames(mirna.DEG.CHVC) <- mirna.namesTop.CHVC
- 
+  
   #= Volcano =#
-  volcano(fit.mirna.CHVC)
+  if(save){
+    pdf("../Figures/Volcano_miRNA_CHVC.pdf")
+    volcano(fit.mirna.CHVC)
+    dev.off()
+  } else {
+    volcano(fit.mirna.CHVC)
+  }
+  
   
   return(list(mirna.DEG.CHVC, mirna.namesTop.CHVC))
 }
 
 ##===== Cholestatic Vs Drained (CHVD) =====##
-miRNA_CHVD <- function(){
+miRNA_CHVD <- function(save = TRUE){
   mirna.design <- init.miRNA()
   #= Contrasts =#
   contrasts.mirna.CHVD = makeContrasts(cholestasis_v_drained = cholestasis - drained,
-                                    levels = mirna.design)
+                                       levels = mirna.design)
   #= Fit =#
   fit.mirna.CHVD <- fit.eb(mirna, mirna.design, contrasts.mirna.CHVD)
   
   #= Top Expressed =#
-  mirna.expressed.CHVD = top.expressed(fit.mirna.CHVD, 
-                                       p.value=0.05, 
-                                       number = nrow(mirna), 
-                                       adjust = "BH")
+  mirna.expressed.CHVD <- top.expressed(fit.mirna.CHVD, 
+                                        p.value=0.05, 
+                                        number = nrow(mirna), 
+                                        adjust = "BH")
   
   #= Identify Gene Symbol =#
   mirna.namesTop.CHVD<-rownames(mirna.expressed.CHVD)
@@ -347,7 +377,13 @@ miRNA_CHVD <- function(){
   rownames(mirna.DEG.CHVD)<- mirna.namesTop.CHVD
   
   #= Volcano =#
-  volcano(fit.mirna.CHVD)
+  if(save){
+    pdf("../Figures/Volcano_miRNA_CHVD.pdf")
+    volcano(fit.mirna.CHVD)
+    dev.off()
+  } else {
+    volcano(fit.mirna.CHVD)
+  }
   
   return(list(mirna.DEG.CHVD, mirna.namesTop.CHVD))
 }

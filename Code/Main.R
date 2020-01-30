@@ -1,6 +1,21 @@
+#=============================================================================#
+# Project Period, Liver cholestasis data analysis         							      #					  
+#	Data Formatting                                                             #
+# Version: 1.0   															                                #
+# Date: 9-1-2020											             	                          #
+# Authors: Ariadna Fosch i Muntané, ID: I6215203, Maastricht University       #
+#          Jip de Kok, ID: I6119367 , Maastricht University                   #
+#          Ravin Schmidl, ID: I6125866, Maastricht University                 #
+#          Stefan Meier, ID: I6114194 , Maastricht University                 #
+#=============================================================================#
+
+#===========================================================#
+##           load all required packages functions          ##
+#===========================================================#
 library(rstudioapi)
 current_path <- getActiveDocumentContext()$path 
-setwd(dirname(current_path))
+setwd(dirname(current_path))          # Set working directory
+source("package_Manager.R")
 source("dataFormatting.R")
 source("Expression_Analysis.R")
 source("PCA.R")
@@ -9,127 +24,249 @@ source("interaction_network.R")
 source("Gene_ontology.R")
 source("Plots.R")
 
-if (!requireNamespace("rstudioapi", quietly = TRUE))
-  install.packages("rstudioapi")
-if (!requireNamespace("networkD3", quietly = TRUE))
-  install.packages("networkD3")
-if (!requireNamespace("multiMiR", quietly = TRUE))
-  install.packages("multiMiR")
-if (!requireNamespace("org.Hs.eg.db", quietly = TRUE))
-  install.packages("org.Hs.eg.db")
-if (!requireNamespace("Rgraphviz", quietly = TRUE))
-  install.packages("Rgraphviz")
-if (!requireNamespace("edgeR", quietly = TRUE))
-  install.packages("edgeR")
-if (!requireNamespace("limma", quietly = TRUE))
-  install.packages("limma")
-if (!requireNamespace("topGO", quietly = TRUE))
-  install.packages("topGO")
-if (!requireNamespace("ggplot2", quietly = TRUE))
-  install.packages("ggplot2")
-if (!requireNamespace("ggdendro", quietly = TRUE))
-  install.packages("ggdendro")
-if (!requireNamespace("plyr", quietly = TRUE))
-  install.packages("plyr")
-if (!requireNamespace("reshape2", quietly = TRUE))
-  install.packages("reshape2")
-if (!requireNamespace("gplots", quietly = TRUE))
-  install.packages("gplots")
-if (!requireNamespace("pcaMethods", quietly = TRUE))
-  install.packages("pcaMethods")
-
-
-library(networkD3)
-library(limma)
-library(multiMiR)
-library(Rgraphviz)
-library(topGO)
-library(org.Hs.eg.db)
-library(ggplot2)
-library(rstudioapi)
-library(ggdendro)
-library(reshape2)
-library(plyr)
-library(gplots)
-library(pcaMethods)
+dir.create("../Figures", showWarnings = F) # Initialise folder for figures
 
 #============================================#
 ##                   mRNA                   ##
 #============================================#
-#= Drain V Control (DVC) =#
-mRNA.DVC <- mRNA_DVC()
+#== Drain V Control (DVC) ==#
+mRNA.DVC <- mRNA_DVC(save = TRUE)
 
 
-#= Cholestatic V Control (CHVC) =#
-mRNA.CHVC <- mRNA_CHVC()
-GO.mRNA.CHVC <- get_GO(mRNA.CHVC, 1, FALSE, "mRNA_CHVC")
-mRNA.CHVC.GO.Network <- longFormat.Enrichment(GO.mRNA.CHVC[[1]], mRNA.CHVC, GO.mRNA.CHVC[[3]])
+#== Cholestatic V Control (CHVC) ==#
+mRNA.CHVC <- mRNA_CHVC(save = TRUE)
+
+#= GO - Biological Process =#
+GO.mRNA.CHVC.BP <- get_GO(mRNA.CHVC, 
+                          1, 
+                          FALSE, 
+                          "mRNA_CHVC", 
+                          "mRNA: Cholestatic V Control (CHVC) \n Enriched Biological Processes", 
+                          Onto = "BP",
+                          save = TRUE,
+                          "GO_mRNA_CHVC_BP.pdf",
+                          "Biological Processes")
+mRNA.CHVC.GO.Network.BP <- longFormat.Enrichment(GO.mRNA.CHVC.BP[[1]], mRNA.CHVC, GO.mRNA.CHVC.BP[[3]])
+mRNA.GO.network.data.CHVC.BP <- generate_network_data(mRNA.CHVC.GO.Network.BP,
+                                                      group1 = "GO: Biological Process",
+                                                      group2 = "mRNA (entrez ID")
+
+visualise_network(mRNA.GO.network.data.CHVC.BP[[1]], 
+                  mRNA.GO.network.data.CHVC.BP[[2]],
+                  edgeWidth = 1,
+                  saveName = "GO biological processess network.html",
+                  silent = FALSE)
+
+#= GO - Molecular Function =#
+GO.mRNA.CHVC.MF <- get_GO(mRNA.CHVC, 
+                          1, 
+                          FALSE, 
+                          "mRNA_CHVC", 
+                          "mRNA: Cholestatic V Control (CHVC) \n Enriched Molecular Functions", 
+                          Onto = "MF",
+                          save = TRUE,
+                          "GO_mRNA_CHVC_MF.pdf",
+                          "Molecular Functions")
+
+mRNA.CHVC.GO.Network.MF <- longFormat.Enrichment(GO.mRNA.CHVC.MF[[1]], mRNA.CHVC, GO.mRNA.CHVC.MF[[3]])
+
+mRNA.GO.network.data.CHVC.MF <- generate_network_data(mRNA.CHVC.GO.Network.MF,
+                                                      group1 = "GO: Molecular Function",
+                                                      group2 = "mRNA (entrez ID")
+
+visualise_network(mRNA.GO.network.data.CHVC.MF[[1]], 
+                  mRNA.GO.network.data.CHVC.MF[[2]],
+                  edgeWidth = 1,
+                  saveName = "GO molecular function network.html",
+                  silent = FALSE)
+
+#= GO - Cellular Components =#
+GO.mRNA.CHVC.CC <- get_GO(mRNA.CHVC, 
+                          1, 
+                          FALSE, 
+                          "mRNA_CHVC", 
+                          "mRNA: Cholestatic V Control (CHVC) \n Enriched Cellular Components", 
+                          Onto = "CC",
+                          save = TRUE,
+                          "GO_mRNA_CHVC_CC.pdf",
+                          "Cellular Components")
+
+mRNA.CHVC.GO.Network.CC <- longFormat.Enrichment(GO.mRNA.CHVC.CC[[1]], mRNA.CHVC, GO.mRNA.CHVC.CC[[3]])
+
+mRNA.GO.network.data.CHVC.CC <- generate_network_data(mRNA.CHVC.GO.Network.CC,
+                                                      group1 = "GO: Cellular Component",
+                                                      group2 = "mRNA (entrez ID")
+visualise_network(mRNA.GO.network.data.CHVC.CC[[1]], 
+                  mRNA.GO.network.data.CHVC.CC[[2]],
+                  edgeWidth = 1,
+                  saveName = "GO cellular component network.html",
+                  silent = FALSE)
+
+#= Heatmap =#
+heatmap(mrna, mRNA.CHVC[[1]], labels,
+        "mRNA heatmap (CHVC)", 
+        save = TRUE,
+        "../Figures/Heatmap_mRNA_CHVC.pdf")
+
 
 #= Cholestatic V Drain (CHVD) =#
-mRNA.CHVD <- mRNA_CHVD()
-GO.mRNA.CHVD <- get_GO(mRNA.CHVD, 1, FALSE, "mRNA_CHVC")
-mRNA.CHVD.GO.Network <- longFormat.Enrichment(GO.mRNA.CHVD[[1]], mRNA.CHVD, GO.mRNA.CHVD[[3]])
+mRNA.CHVD <- mRNA_CHVD(save = TRUE)
+#= Heatmap =#
+heatmap(mrna, 
+        mRNA.CHVD[[1]],
+        labels,
+        "mRNA heatmap (CHVD)", 
+        save = TRUE,
+        "../Figures/Heatmap_mRNA_CHVD.pdf")
 
 #== Plots ==#
 #= PCA =#
-PCA.mrna()
-PCA.mrnaCorrected()
+PCA.mrna("PCA_mRNA_treatment.pdf", save = TRUE)
+PCA.mrnaCorrected("PCA_mRNA_Corrected.pdf", save = TRUE)
 
 #= Box Plots =#
-mrna.boxPlot()
-
-#= Heatmap =#
-# CHVC #
-heatmap(mrna, mRNA.CHVC[[1]], "mRNA heatmap (CHVC)")
-
-# CHVD #
-heatmap(mrna, mRNA.CHVD[[1]], "mRNA heatmap (CHVD)")
+mrna.boxPlot(save = TRUE, "../Figures/Boxplot_mRNA.pdf")
 
 #= Anova =#
-mRNA.Anova <- mrna.Anova()
-
+mRNA_Anova <- mrna.Anova()
 
 #============================================#
 ##                  miRNA                   ##
 #============================================#
+#============================================#
+##                  miRNA                   ##
+#============================================#
 #= Drain V Control (DVC) =#
-miRNA.DVC <- miRNA_DVC()
+miRNA.DVC <- miRNA_DVC(save = TRUE)
 
-#= Cholestatic V Control (CHVC) =#
-miRNA.CHVC <- miRNA_CHVC()
-mirna.CHVC.targets <- miRNA.targets(mRNA.CHVC[[1]], miRNA.CHVC[[1]])
-GO.miRNA.CHVC <- get_GO(mRNA.CHVC, mirna.CHVC.targets, TRUE, "miRNA_CHVC")
-miRNA.CHVC.GO.Network <- longFormat.Enrichment(GO.miRNA.CHVC[[1]], miRNA.CHVC, GO.miRNA.CHVC[[3]])
-miRNA.GO.network.data <- generate_network_data(mRNA.CHVC.GO.Network)
-link <- miRNA.GO.network.data[[1]]
-node <- miRNA.GO.network.data[[2]]
-visualise_network(link, node, silent = FALSE)
+#=== Cholestatic V Control (CHVC) ===#
+miRNA.CHVC <- miRNA_CHVC(save = TRUE)
+mirna.CHVC.targets <- miRNA.targets(mRNA.CHVC[[1]], miRNA.CHVC[[1]], removeDuplicates = FALSE)
 
-#= Cholestatic V Drain (CHVD) =#
-miRNA.CHVD <- miRNA_CHVD()
+#= miRNA dendrogram =#
+dendrogram(miRNA.CHVC[[1]], mirna.CHVC.targets, TRUE, "../Figures/Dendrogram_CHVC.pdf")
+
+#= GO - Biological Process =#
+GO.miRNA.CHVC.BP <- get_GO(miRNA.CHVC[[1]], 
+                           mirna.CHVC.targets, 
+                           use_target = TRUE, 
+                           "miRNA_CHVC", 
+                           "miRNA: Cholestatic V Control (CHVC) \n Enriched Biological Processes", 
+                           Onto = "BP",
+                           save = TRUE,
+                           "GO_miRNA_CHVC_BP.pdf",
+                           "Biological Processes"
+                            )
+
+#= GO - Molecular Function =#
+GO.miRNA.CHVC.MF <- get_GO(miRNA.CHVC[[1]], 
+                           mirna.CHVC.targets, 
+                           TRUE, 
+                           "miRNA_CHVC", 
+                           "miRNA: Cholestatic V Control (CHVC) \n Enriched Molecular Functions", 
+                           Onto = "MF",
+                           save = TRUE,
+                           "GO_miRNA_CHVC_MF.pdf",
+                           "Molecular Functions"
+                            )
+
+#= GO - Cellular Component =#
+GO.miRNA.CHVC.CC <- get_GO(miRNA.CHVC[[1]], 
+                           mirna.CHVC.targets, 
+                           TRUE, 
+                           "miRNA_CHVC", 
+                           "miRNA: Cholestatic V Control (CHVC) \n Enriched Cellular Components", 
+                           Onto = "CC",
+                           save = TRUE,
+                           "GO_miRNA_CHVC_CC.pdf",
+                           "Cellular Components"
+                            )
+
+#=== Cholestatic V Drain (CHVD) ===#
+miRNA.CHVD <- miRNA_CHVD(save = TRUE)
 mirna.CHVD.targets <- miRNA.targets(mRNA.CHVD[[1]], miRNA.CHVD[[1]])
-GO.miRNA.CHVD <- get_GO(mRNA.CHVD, mirna.CHVD.targets, TRUE, "miRNA_CHVD")
-miRNA.CHVD.GO.Network <- longFormat.Enrichment(GO.miRNA.CHVD[[1]], mRNA.CHVD, GO.miRNA.CHVD[[3]])
+
+#= miRNA dend«rogram =#
+dendrogram(miRNA.CHVD[[1]], mirna.CHVD.targets, TRUE, "../Figures/Dendrogram_CHVD.pdf")
 
 #== Plots ==#
 #= PCA =#
-PCA.mirna()
-PCA.mirnaCorrected()
+PCA.mirna("PCA_miRNA.pdf", save = TRUE)
+PCA.mirnaCorrected("PCA_miRNA_Corrected.pdf", save = TRUE)
 
 #= Box Plots =#
-mirna.boxPlot()
+mirna.boxPlot(save = TRUE, "../Figures/Boxplot_miRNA.pdf")
 
 #= Anova =#
-miRNA.Anova <- mirna.Anova()
+miRNA_Anova <- mirna.Anova()
 
 #============================================#
 ##           Interaction Network            ##
 #============================================#
+mirna.CHVC.targets.unique <- miRNA.targets(mRNA.CHVC[[1]], miRNA.CHVC[[1]], removeDuplicates = TRUE)
 
-##==== miRNA-mRNA Interaction Network ====##
 
+#=== multiMiR and correlation filter network ===#
+#= Compute the miRNA-mRNA correlations  =#
+corMatrix <- miRNA_correlate(mirna, mrna,
+                             only_DEG = TRUE,
+                             miRNA_DEG = miRNA.CHVC[[2]],
+                             mRNA_DEG = mRNA.CHVC[[2]],
+                             mrna.treatmentOrder = mrna.treatmentOrder)
+
+#= only keep interactions also present from the multiMiR query =#
+mirna.CHVC.targets.unique_overlap <- miRNA_target_overlap(corMatrix, mirna.CHVC.targets.unique)
+
+#= Generate link and node data for the network visualisation =#
+target_overlap_network <- generate_network_data(mirna.CHVC.targets.unique_overlap,
+                                                contains_genes = TRUE)
+
+#= Visualise the multiMiR with correlation filter network =#
+target_overlap_network_visualisation <- visualise_network(target_overlap_network[[1]],
+                                                          target_overlap_network[[2]],
+                                                          silent = FALSE,
+                                                          nodeSizeDiff = 0.95,
+                                                          nameVisiblity  = 0.9,
+                                                          force = -30,
+                                                          linkDistance = 120,
+                                                          bounded = TRUE,
+                                                          width = 1490,
+                                                          height = 720,
+                                                          saveName = "multiMiR and correlation filter network.html"
+)
+
+#=== Correlation based network ===#
+#= load the miRNA-mRNA interactions based on the pearson correlations =#
+correlation_data <- corMatrix[,c("mRNA", "miRNA", "p-value")]
+
+#= Generate link and node data for the network visualisation =#
+target_overlap_network <- generate_network_data(correlation_data,
+                                                contains_genes = TRUE)
+
+#= Visualise the correlation based network =#
+correlation_network_visualisation <- visualise_network(target_overlap_network[[1]],
+                                                       target_overlap_network[[2]],
+                                                       silent = FALSE,
+                                                       nodeSizeDiff = 0.7,
+                                                       nameVisiblity  = 0,
+                                                       force = -30,
+                                                       linkDistance = 150,
+                                                       bounded = TRUE,
+                                                       width = 1490,
+                                                       height = 840,
+                                                       edgeWidth = 1,
+                                                       saveName = "Correlation network.html")
+
+##==== multiMiR query miRNA-mRNA Interaction Network ====##
+# === This part is obselete and unfunctional == #
 mirna_mrna.CHVC <- miRNA_mRNA_interaction_network(mRNA.CHVC[[1]], miRNA.CHVC[[1]])
-visualise_network(mirna_mrna.CHVC[[1]], mirna_mrna.CHVC[[2]], silent = TRUE)
+mirna_mrna.CHVC_network <- visualise_network(mirna_mrna.CHVC[[1]], mirna_mrna.CHVC[[2]],
+                                             silent = FALSE,
+                                             edgeWidth = 1,
+                                             width = 1920,
+                                             height = 2080,
+                                             bounded = FALSE,
+                                             saveName = "miRNA-mRNA interaction network CHvC.html")
 
 mirna_mrna.CHVD <- miRNA_mRNA_interaction_network(mRNA.CHVD[[1]], miRNA.CHVD[[1]])
 visualise_network(mirna_mrna.CHVD[[1]], mirna_mrna.CHVD[[2]])
@@ -145,16 +282,4 @@ visualise_network(mirna_mrna.CHVD[[1]], mirna_mrna.CHVD[[2]])
 ##       Interaction Network - Jip          ##
 #============================================#
 
-corMatrix <- miRNA_correlate(mirna, mrna,
-                             only_DEG = TRUE,
-                             miRNA_DEG = miRNA.CHVC[[2]],
-                             mRNA_DEG = mRNA.CHVC[[2]],
-                             mrna.treatmentOrder = mrna.treatmentOrder)
-mirna.CHVC.targets_overlap <- miRNA_target_overlap(corMatrix, mirna.CHVC.targets)
-
-target_overlap_network <- generate_network_data(mirna.CHVC.targets_overlap,
-                                                contains_genes = TRUE)
-target_overlap_network_visualisation <- visualise_network(target_overlap_network[[1]],
-                                                          target_overlap_network[[2]],
-                                                          silent = FALSE)
 

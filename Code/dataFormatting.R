@@ -3,7 +3,7 @@
 #	Data Formatting                                                             #
 # Version: 1.0   															                                #
 # Date: 9-1-2020											             	                          #
-# Authors: Ariadna Fosch i MuntanÃ©, ID: I6215203, Maastricht University       #
+# Authors: Ariadna Fosch i Muntané, ID: I6215203, Maastricht University       #
 #          Jip de Kok, ID: I6119367 , Maastricht University                   #
 #          Ravin Schmidl, ID: I6125866, Maastricht University                 #
 #          Stefan Meier, ID: I6114194 , Maastricht University                 #
