@@ -48,6 +48,10 @@ if (!requireNamespace("formattable", quietly = TRUE))
   install.packages("formattable")
 if (!requireNamespace("dplyr", quietly = TRUE))
   install.packages("dplyr")
+if (!requireNamespace("gtools", quietly = TRUE))
+  install.packages("gtools")
+if (!requireNamespace("formattable", quietly = TRUE))
+  install.packages("formattable")
 
 #Graphing
 if (!requireNamespace("ggplot2", quietly = TRUE))
@@ -77,6 +81,8 @@ library(formattable)
 library(dplyr)
 library(reshape2)
 library(plyr)
+library(gtools)
+library(formattable)
 
 #Graphing
 library(gplots)

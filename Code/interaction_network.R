@@ -186,12 +186,13 @@ visualise_network <- function(network_link,
                               linkDistance = 150,
                               saveName = "interaction_network.html"){
   
-  MyClickScript <- 
-    'alert(Object.getOwnPropertyNames(d));'
+  # MyClickScript <- 'alert(Object.getOwnPropertyNames(d));' # use this to show all available node properties
   
   MyClickScript <-   'alert("You clicked " + d.name + " which has a degree of: " + d.nodesize);'
   
   nodeSize <- sprintf("Math.pow(d.nodesize, %f) + 4", nodeSizeDiff)
+  
+  saveName <- paste("../Figures/" ,saveName, sep = "")
   
   miRNA_interaction_network <- forceNetwork(Links   = network_link,
                                             Nodes   = network_node,

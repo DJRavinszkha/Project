@@ -9,48 +9,8 @@
 #          Stefan Meier, ID: I6114194 , Maastricht University                 #
 #=============================================================================#
 
-#=========================================#
-##           Initialise Data             ##
-#=========================================#
-
-Data <- format() #Remember to run dataFormatting.R first before initialising data
-mrna <- data.frame(Data[1]) #mRNA expression data (contains entrez ID as index)
-mirna <- data.frame(Data[2]) #miRNA expression data (contains miRNA name as index)
-labels <- data.frame(Data[3]) #batch and treatment id/labels for samples
-key <- data.frame(Data[4]) #entrezID to genesymbol key
-
-#===========================================================================#
-## 1. Get list of how treatments and batches are ordered on mRNA and miRNA ##
-#===========================================================================#
-# Notes: 1. treat_order_mrna changed to mrna.treatmentOrder
-#        2. treat_order_mirna changed to mirna.treatmentOrder
-
-#Initialise Sample Groups
-sampleGroups <- data.frame(treatment = labels$treatment, treatment.id = labels$treatment.id, sampleName = labels$sample.name)
-
-# Get treatment order mrna
-mrna.treatmentOrder <- matrix(nrow = (ncol(mrna)), ncol = 1)
-colnames(mrna.treatmentOrder) <- "sampleName"
-mrna.treatmentOrder[,1] <- colnames(mrna)
-mrna.treatmentOrder <- merge(mrna.treatmentOrder, sampleGroups, by = "sampleName", sort = FALSE)
-
-
-# Get treatment order mirna
-mirna.treatmentOrder <- matrix(nrow = (ncol(mirna)), ncol = 1)
-colnames(mirna.treatmentOrder) <- "sampleName"
-mirna.treatmentOrder[,1] <- colnames(mirna)
-mirna.treatmentOrder <- merge(mirna.treatmentOrder, sampleGroups, by = "sampleName", sort = FALSE)
-mirna.treatmentOrder <- mirna.treatmentOrder[order(mirna.treatmentOrder$treatment.id),] #order based on treatment ID
-
-# Get batch order mrna
-mrna.batches <- data.frame(batch = labels$mRNA.batch, batch.id = labels$mRNA.batch.id, file = labels$mRNA.file)
-
-# Get batch order mirna
-mirna.batches <- data.frame(batch = labels$miRNA.batch, batch.id = labels$miRNA.batch.id, file = labels$mRNA.file, sort= FALSE)
-
-
 #=========================#
-##    2. PCA Function    ## 
+##    1. PCA Function    ## 
 #=========================#
 
 
@@ -116,7 +76,7 @@ PCA <- function(data,
 }
 
 #=========================#
-## 3. PCA for mRNA DATA  ## 
+## 2. PCA for mRNA DATA  ## 
 #=========================#
 PCA.mrna <- function(main_Title, save = TRUE){
   # Notes: 1. Batch_number_mrna changed to mrna.batches
@@ -138,7 +98,7 @@ PCA.mrna <- function(main_Title, save = TRUE){
   return(plot)
 }
 #=========================#
-## 4. PCA for miRNA DATA ##
+## 3. PCA for miRNA DATA ##
 #=========================#
 # Notes: 1. Batch_number_mirna changed to mirna.batches
 #        2. Batch_num changed to batch
@@ -161,7 +121,7 @@ PCA.mirna <- function(main_Title, save = TRUE) {
   return(plot)
 }
 #================#
-## 5. Heat maps ##
+## 4. Heat maps ##
 #================#
 # Don't remove only silenced because it takes too much time to run. 
 
@@ -170,7 +130,7 @@ PCA.mirna <- function(main_Title, save = TRUE) {
 
 
 #========================================================================#
-## 6. PCA showing batches and treatment simultaneously (symbol & color) ## 
+## 5. PCA showing batches and treatment simultaneously (symbol & color) ## 
 #========================================================================#
 #Don't remove just in case we need it. 
 #Note: Remember to change variables as outlined in parts 2 and 3
@@ -211,7 +171,7 @@ PCA.mirna <- function(main_Title, save = TRUE) {
 #   theme_light()
 
 #=============================#
-## 7. ANOVA (mrna and mirna) ##
+## 6. ANOVA (mrna and mirna) ##
 #=============================#
 
 # Anova testing mRNA
@@ -230,7 +190,7 @@ mirna.Anova <- function(){
 #The anova shows that the mirna doesn't need correction as there is no significant batch variance
 
 #==============================#
-## 8. Batch effect correction ##
+## 7. Batch effect correction ##
 #==============================#
 
 
@@ -261,7 +221,7 @@ mirna.boxPlot <- function(save = TRUE, title){
   }
 }
 #=============================#
-## 9. PCA for corrected data ##
+## 8. PCA for corrected data ##
 #=============================#
 
 ##====  mRNA corrected  ====##
@@ -303,6 +263,6 @@ PCA.mirnaCorrected <- function(main_Title, save = save){
   return(plot)
 }
 
-# Interbatch variability was very high before the coorection. This didn't allow us to see the 
+# Interbatch variability was very high before the correction. This didn't allow us to see the 
 # Intrabatch variability. After the correction all batches are more similar and we can see the
 # intrabatch variability.

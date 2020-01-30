@@ -1,42 +1,57 @@
 #=============================================================================#
-# Project Period, Liver cholestasis data analysis         							      #					  
-#	Data Formatting                                                             #
-# Version: 1.0   															                                #
-# Date: 9-1-2020											             	                          #
+# Project Period, Liver cholestasis data analysis                             #					  
+#	Data Formatting                                                       #
+# Version: 1.0   			                                      #
+# Date: 9-1-2020							      #
 # Authors: Ariadna Fosch i Muntané, ID: I6215203, Maastricht University       #
 #          Jip de Kok, ID: I6119367 , Maastricht University                   #
 #          Ravin Schmidl, ID: I6125866, Maastricht University                 #
 #          Stefan Meier, ID: I6114194 , Maastricht University                 #
 #=============================================================================#
 
+#=============================================================================#
+#=====                    1 ~  INITIALISATION                            =====#
+#=============================================================================#
+
 #===========================================================#
-##           load all required packages functions          ##
+##        1.0 ~ load all required packages functions       ##
 #===========================================================#
 library(rstudioapi)
 current_path <- getActiveDocumentContext()$path 
-setwd(dirname(current_path))          # Set working directory
-source("package_Manager.R")
-source("dataFormatting.R")
-source("Expression_Analysis.R")
-source("PCA.R")
-source("miRNA_Target_Analysis.R")
-source("interaction_network.R")
-source("Gene_ontology.R")
-source("Plots.R")
+setwd(dirname(current_path))                    # Set working directory
+source("package_Manager.R")                     # Intall and load packages
+source("dataFormatting.R")                      # Load and format the data
+source("Expression_Analysis.R")                 # Load functions for the DE analysis
+source("PCA.R")                                 # Load functions for Principal Component analysis
+source("miRNA_Target_Analysis.R")               # Load functions to miRNA target prediction
+source("interaction_network.R")                 # Load functions for network visualisation
+source("Gene_ontology.R")                       # Load functions for Gene Ontology
+source("Plots.R")                               # Load functions for plotting
+source("Demographic_Analysis.R")
 
-dir.create("../Figures", showWarnings = F) # Initialise folder for figures
+dir.create("../Figures", showWarnings = F)      # Initialise folder for figures
 
-#============================================#
-##                   mRNA                   ##
-#============================================#
-#== Drain V Control (DVC) ==#
+#=============================================================================#
+#=====                     2 ~ mRNA ANALYSIS                             =====#
+#=============================================================================#
+
+#===========================================================#
+##       2.0 ~ Find differentially exprressed mRNAs        ##
+#===========================================================#
+#== Calcualte DEGs for Drain V Control (DVC) ==#
 mRNA.DVC <- mRNA_DVC(save = TRUE)
 
-
-#== Cholestatic V Control (CHVC) ==#
+#== Calcualte DEGs for Cholestatic V Control (CHVC) ==#
 mRNA.CHVC <- mRNA_CHVC(save = TRUE)
 
-#= GO - Biological Process =#
+#= Calcualte DEGs for Cholestatic V Drain (CHVD) =#
+mRNA.CHVD <- mRNA_CHVD(save = TRUE)
+
+#===========================================================#
+##        2.1 ~ Run Gene Ontology analysis on mRNAs        ##
+#===========================================================#
+
+#= perform GO analysis - Biological Process =#
 GO.mRNA.CHVC.BP <- get_GO(mRNA.CHVC, 
                           1, 
                           FALSE, 
@@ -46,18 +61,9 @@ GO.mRNA.CHVC.BP <- get_GO(mRNA.CHVC,
                           save = TRUE,
                           "GO_mRNA_CHVC_BP.pdf",
                           "Biological Processes")
-mRNA.CHVC.GO.Network.BP <- longFormat.Enrichment(GO.mRNA.CHVC.BP[[1]], mRNA.CHVC, GO.mRNA.CHVC.BP[[3]])
-mRNA.GO.network.data.CHVC.BP <- generate_network_data(mRNA.CHVC.GO.Network.BP,
-                                                      group1 = "GO: Biological Process",
-                                                      group2 = "mRNA (entrez ID")
 
-visualise_network(mRNA.GO.network.data.CHVC.BP[[1]], 
-                  mRNA.GO.network.data.CHVC.BP[[2]],
-                  edgeWidth = 1,
-                  saveName = "GO biological processess network.html",
-                  silent = FALSE)
 
-#= GO - Molecular Function =#
+#= perform GO analysis - Molecular Function =#
 GO.mRNA.CHVC.MF <- get_GO(mRNA.CHVC, 
                           1, 
                           FALSE, 
@@ -68,19 +74,8 @@ GO.mRNA.CHVC.MF <- get_GO(mRNA.CHVC,
                           "GO_mRNA_CHVC_MF.pdf",
                           "Molecular Functions")
 
-mRNA.CHVC.GO.Network.MF <- longFormat.Enrichment(GO.mRNA.CHVC.MF[[1]], mRNA.CHVC, GO.mRNA.CHVC.MF[[3]])
 
-mRNA.GO.network.data.CHVC.MF <- generate_network_data(mRNA.CHVC.GO.Network.MF,
-                                                      group1 = "GO: Molecular Function",
-                                                      group2 = "mRNA (entrez ID")
-
-visualise_network(mRNA.GO.network.data.CHVC.MF[[1]], 
-                  mRNA.GO.network.data.CHVC.MF[[2]],
-                  edgeWidth = 1,
-                  saveName = "GO molecular function network.html",
-                  silent = FALSE)
-
-#= GO - Cellular Components =#
+#= perform GO analysis - Cellular Components =#
 GO.mRNA.CHVC.CC <- get_GO(mRNA.CHVC, 
                           1, 
                           FALSE, 
@@ -91,27 +86,18 @@ GO.mRNA.CHVC.CC <- get_GO(mRNA.CHVC,
                           "GO_mRNA_CHVC_CC.pdf",
                           "Cellular Components")
 
-mRNA.CHVC.GO.Network.CC <- longFormat.Enrichment(GO.mRNA.CHVC.CC[[1]], mRNA.CHVC, GO.mRNA.CHVC.CC[[3]])
+#===========================================================#
+##             2.2 ~ Generate heatmaps of DE mRNA          ##
+#===========================================================#
 
-mRNA.GO.network.data.CHVC.CC <- generate_network_data(mRNA.CHVC.GO.Network.CC,
-                                                      group1 = "GO: Cellular Component",
-                                                      group2 = "mRNA (entrez ID")
-visualise_network(mRNA.GO.network.data.CHVC.CC[[1]], 
-                  mRNA.GO.network.data.CHVC.CC[[2]],
-                  edgeWidth = 1,
-                  saveName = "GO cellular component network.html",
-                  silent = FALSE)
-
-#= Heatmap =#
-heatmap(mrna, mRNA.CHVC[[1]], labels,
+#= Generate Heatmap for DEGs of Cholestatic vs Control =#
+heatmap(mrna, mRNA.CHVC[[1]],
+        labels,
         "mRNA heatmap (CHVC)", 
         save = TRUE,
         "../Figures/Heatmap_mRNA_CHVC.pdf")
 
-
-#= Cholestatic V Drain (CHVD) =#
-mRNA.CHVD <- mRNA_CHVD(save = TRUE)
-#= Heatmap =#
+#= Generate Heatmap for DEGs of Cholestatic vs Drained =#
 heatmap(mrna, 
         mRNA.CHVD[[1]],
         labels,
@@ -119,34 +105,71 @@ heatmap(mrna,
         save = TRUE,
         "../Figures/Heatmap_mRNA_CHVD.pdf")
 
-#== Plots ==#
-#= PCA =#
-PCA.mrna("PCA_mRNA_treatment.pdf", save = TRUE)
-PCA.mrnaCorrected("PCA_mRNA_Corrected.pdf", save = TRUE)
 
-#= Box Plots =#
-mrna.boxPlot(save = TRUE, "../Figures/Boxplot_mRNA.pdf")
+# #===========================================================#
+# ##             2.3 ~ Principal Component Analysis          ##
+# #===========================================================#
+# 
+# #= perform PCA on mRNA data =#
+# PCA.mrna("PCA_mRNA_treatment.pdf", save = TRUE)
+# PCA.mrnaCorrected("PCA_mRNA_Corrected.pdf", save = TRUE)
 
-#= Anova =#
-mRNA_Anova <- mrna.Anova()
+# #===========================================================#
+# ##                  2.4 ~ Create boxplots                  ##
+# #===========================================================#
+# 
+# #= Box Plots =#
+# mrna.boxPlot(save = TRUE, "../Figures/Boxplot_mRNA.pdf")
+# 
+# #===========================================================#
+# ##              2.5 ~ Run Anova on mRNA data               ##
+# #===========================================================#
+# 
+# #= Anova =#
+# mRNA_Anova <- mrna.Anova()
 
-#============================================#
-##                  miRNA                   ##
-#============================================#
-#============================================#
-##                  miRNA                   ##
-#============================================#
+#=============================================================================#
+#=====                     3 ~ miRNA ANALYSIS                            =====#
+#=============================================================================#
+
+#===========================================================#
+##       3.0 ~ Find differentially exprressed miRNAs       ##
+#===========================================================#
 #= Drain V Control (DVC) =#
 miRNA.DVC <- miRNA_DVC(save = TRUE)
 
 #=== Cholestatic V Control (CHVC) ===#
 miRNA.CHVC <- miRNA_CHVC(save = TRUE)
+
+
+#=== Cholestatic V Drain (CHVD) ===#
+miRNA.CHVD <- miRNA_CHVD(save = TRUE)
+
+#===========================================================#
+##         3.1 ~ Query miRNA targets with multiMiR         ##
+#===========================================================#
+
+#= query targets for DE miRNAs of Cholestatic vs. Control =#
 mirna.CHVC.targets <- miRNA.targets(mRNA.CHVC[[1]], miRNA.CHVC[[1]], removeDuplicates = FALSE)
 
-#= miRNA dendrogram =#
+#= query targets for DE miRNAs of Cholestatic vs. Drained =#
+mirna.CHVD.targets <- miRNA.targets(mRNA.CHVD[[1]], miRNA.CHVD[[1]])
+
+#===========================================================#
+##   3.2 ~ miRNA targets similarity dendrogram generation  ##
+#===========================================================#
+
+#= miRNA dendrogram - Cholestatic vs. Control =#
 dendrogram(miRNA.CHVC[[1]], mirna.CHVC.targets, TRUE, "../Figures/Dendrogram_CHVC.pdf")
 
-#= GO - Biological Process =#
+#= miRNA dendrogram - Cholestatic vs. Drained =#
+dendrogram(miRNA.CHVD[[1]], mirna.CHVD.targets, TRUE, "../Figures/Dendrogram_CHVD.pdf")
+
+#===========================================================#
+##       3.3 ~ Run Gene Ontology analysis on miRNAs        ##
+#===========================================================#
+
+#= perform GO analysis - Biological Process =#
 GO.miRNA.CHVC.BP <- get_GO(miRNA.CHVC[[1]], 
                            mirna.CHVC.targets, 
                            use_target = TRUE, 
@@ -158,7 +181,7 @@ GO.miRNA.CHVC.BP <- get_GO(miRNA.CHVC[[1]],
                            "Biological Processes"
                             )
 
-#= GO - Molecular Function =#
+#= perform GO analysis - Molecular Function =#
 GO.miRNA.CHVC.MF <- get_GO(miRNA.CHVC[[1]], 
                            mirna.CHVC.targets, 
                            TRUE, 
@@ -170,7 +193,7 @@ GO.miRNA.CHVC.MF <- get_GO(miRNA.CHVC[[1]],
                            "Molecular Functions"
                             )
 
-#= GO - Cellular Component =#
+#= perform GO analysis - Cellular Component =#
 GO.miRNA.CHVC.CC <- get_GO(miRNA.CHVC[[1]], 
                            mirna.CHVC.targets, 
                            TRUE, 
@@ -182,27 +205,50 @@ GO.miRNA.CHVC.CC <- get_GO(miRNA.CHVC[[1]],
                            "Cellular Components"
                             )
 
-#=== Cholestatic V Drain (CHVD) ===#
-miRNA.CHVD <- miRNA_CHVD(save = TRUE)
-mirna.CHVD.targets <- miRNA.targets(mRNA.CHVD[[1]], miRNA.CHVD[[1]])
+#=============================================================================#
+#=====               4 ~ ADDITIONAL PLOTS AND ANALYSIS                   =====#
+#=============================================================================#
 
-#= miRNA dend«rogram =#
-dendrogram(miRNA.CHVD[[1]], mirna.CHVD.targets, TRUE, "../Figures/Dendrogram_CHVD.pdf")
+#===========================================================#
+##           4.0 ~ Principal Component Analysis            ##
+#===========================================================#
 
-#== Plots ==#
-#= PCA =#
+#= perform PCA on mRNA data =#
+PCA.mrna("PCA_mRNA_treatment.pdf", save = TRUE)
+PCA.mrnaCorrected("PCA_mRNA_Corrected.pdf", save = TRUE)
+
+#= perform PCA on miRNA data =#
 PCA.mirna("PCA_miRNA.pdf", save = TRUE)
 PCA.mirnaCorrected("PCA_miRNA_Corrected.pdf", save = TRUE)
 
-#= Box Plots =#
+
+#===========================================================#
+##                  4.1 ~ Create boxplots                  ##
+#===========================================================#
+#= Box Plots of mRNA =#
+mrna.boxPlot(save = TRUE, "../Figures/Boxplot_mRNA.pdf")
+
+#= Box Plots of miRNA =#
 mirna.boxPlot(save = TRUE, "../Figures/Boxplot_miRNA.pdf")
 
-#= Anova =#
+
+#===========================================================#
+##              4.2 ~ Run Analysis of Variance             ##
+#===========================================================#
+#= ANOVA on mRNA =#
+mRNA_Anova <- mrna.Anova()
+
+#= ANOVA on miRNA =#
 miRNA_Anova <- mirna.Anova()
 
-#============================================#
-##           Interaction Network            ##
-#============================================#
+
+#=============================================================================#
+#=====                    5 ~ INTERACTION NETWORKS                       =====#
+#=============================================================================#
+
+#===========================================================#
+##      5.0 ~ multiMiR and correlation filter network      ##
+#===========================================================#
 mirna.CHVC.targets.unique <- miRNA.targets(mRNA.CHVC[[1]], miRNA.CHVC[[1]], removeDuplicates = TRUE)
 
 
@@ -232,10 +278,15 @@ target_overlap_network_visualisation <- visualise_network(target_overlap_network
                                                           bounded = TRUE,
                                                           width = 1490,
                                                           height = 720,
-                                                          saveName = "multiMiR and correlation filter network.html"
-)
+                                                          saveName = "multiMiR and correlation filter network.html")
 
-#=== Correlation based network ===#
+
+
+
+#===========================================================#
+##               5.1 ~ Correlation based network           ##
+#===========================================================#
+
 #= load the miRNA-mRNA interactions based on the pearson correlations =#
 correlation_data <- corMatrix[,c("mRNA", "miRNA", "p-value")]
 
@@ -257,6 +308,11 @@ correlation_network_visualisation <- visualise_network(target_overlap_network[[1
                                                        edgeWidth = 1,
                                                        saveName = "Correlation network.html")
 
+
+#===========================================================#
+##           5.2 ~ miRNA-mRNA interaction network          ##
+#===========================================================#
+
 ##==== multiMiR query miRNA-mRNA Interaction Network ====##
 # === This part is obselete and unfunctional == #
 mirna_mrna.CHVC <- miRNA_mRNA_interaction_network(mRNA.CHVC[[1]], miRNA.CHVC[[1]])
@@ -271,15 +327,43 @@ mirna_mrna.CHVC_network <- visualise_network(mirna_mrna.CHVC[[1]], mirna_mrna.CH
 mirna_mrna.CHVD <- miRNA_mRNA_interaction_network(mRNA.CHVD[[1]], miRNA.CHVD[[1]])
 visualise_network(mirna_mrna.CHVD[[1]], mirna_mrna.CHVD[[2]])
 
-##==== GO-mRNA Interaction Network ====##
+
+
+#===========================================================#
+##           5.3 ~ Gene Ontology interaction networks      ##
+#===========================================================#
+
+mRNA.CHVC.GO.Network.BP <- longFormat.Enrichment(GO.mRNA.CHVC.BP[[1]], mRNA.CHVC, GO.mRNA.CHVC.BP[[3]])
+mRNA.GO.network.data.CHVC.BP <- generate_network_data(mRNA.CHVC.GO.Network.BP,
+                                                      group1 = "GO: Biological Process",
+                                                      group2 = "mRNA (entrez ID")
+visualise_network(mRNA.GO.network.data.CHVC.BP[[1]], 
+                  mRNA.GO.network.data.CHVC.BP[[2]],
+                  edgeWidth = 1,
+                  saveName = "GO biological processess network.html",
+                  silent = FALSE)
 
 
 
+mRNA.CHVC.GO.Network.MF <- longFormat.Enrichment(GO.mRNA.CHVC.MF[[1]], mRNA.CHVC, GO.mRNA.CHVC.MF[[3]])
+mRNA.GO.network.data.CHVC.MF <- generate_network_data(mRNA.CHVC.GO.Network.MF,
+                                                      group1 = "GO: Molecular Function",
+                                                      group2 = "mRNA (entrez ID")
+visualise_network(mRNA.GO.network.data.CHVC.MF[[1]], 
+                  mRNA.GO.network.data.CHVC.MF[[2]],
+                  edgeWidth = 1,
+                  saveName = "GO molecular function network.html",
+                  silent = FALSE)
 
 
 
-#============================================#
-##       Interaction Network - Jip          ##
-#============================================#
-
+mRNA.CHVC.GO.Network.CC <- longFormat.Enrichment(GO.mRNA.CHVC.CC[[1]], mRNA.CHVC, GO.mRNA.CHVC.CC[[3]])
+mRNA.GO.network.data.CHVC.CC <- generate_network_data(mRNA.CHVC.GO.Network.CC,
+                                                      group1 = "GO: Cellular Component",
+                                                      group2 = "mRNA (entrez ID")
+visualise_network(mRNA.GO.network.data.CHVC.CC[[1]], 
+                  mRNA.GO.network.data.CHVC.CC[[2]],
+                  edgeWidth = 1,
+                  saveName = "GO cellular component network.html",
+                  silent = FALSE)
 

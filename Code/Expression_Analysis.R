@@ -9,6 +9,25 @@
 #          Stefan Meier, ID: I6114194 , Maastricht University                 #
 #=============================================================================#
 
+##====Initialise Data from dataFormatting.R====##
+# source("dataFormatting.R")
+# Data <- format() #Remember to run dataFormatting.R first before initialising data
+# mrna <- data.frame(Data[1]) #mRNA expression data (contains entrez ID as index)
+# mirna <- data.frame(Data[2]) #miRNA expression data (contains miRNA name as index)
+# labels <- data.frame(Data[3]) #batch and treatment id/labels for samples
+# key <- data.frame(Data[4]) #entrezID to genesymbol key
+
+# ##==== PCA Initialisation ====##
+# current_path <- getActiveDocumentContext()$path 
+# setwd(dirname(current_path))
+# source("PCA.R")
+
+# #= Sample Groups =#
+# sampleGroups <- data.frame(treatment = labels$treatment, treatment.id = labels$treatment.id, sampleName = labels$sample.name)
+# 
+# # Get batch order mrna (copied from pca)
+# mrna.batches <- data.frame(batch = labels$mRNA.batch, batch.id = labels$mRNA.batch.id, file = labels$mRNA.file)
+
 #====================================#
 ##            Functions             ##
 #====================================#
@@ -62,27 +81,7 @@ volcano <- function(fit.eb){
 ## Differential Expression Analysis ##
 #====================================#
 
-##====Initialise Data from dataFormatting.R====##
-source("dataFormatting.R")
-Data <- format() #Remember to run dataFormatting.R first before initialising data
-mrna <- data.frame(Data[1]) #mRNA expression data (contains entrez ID as index)
-mirna <- data.frame(Data[2]) #miRNA expression data (contains miRNA name as index)
-labels <- data.frame(Data[3]) #batch and treatment id/labels for samples
-key <- data.frame(Data[4]) #entrezID to genesymbol key
 
-##==== PCA Initialisation ====##
-
-current_path <- getActiveDocumentContext()$path 
-setwd(dirname(current_path))
-source("PCA.R")
-
-
-
-#= Sample Groups =#
-sampleGroups <- data.frame(treatment = labels$treatment, treatment.id = labels$treatment.id, sampleName = labels$sample.name)
-
-# Get batch order mrna (copied from pca)
-mrna.batches <- data.frame(batch = labels$mRNA.batch, batch.id = labels$mRNA.batch.id, file = labels$mRNA.file)
 
 #============================================#
 ##                   mRNA                   ##
@@ -109,7 +108,6 @@ init.mRNA <- function(){
   sex<- factor(conf.mrna$sex.id) #Create a factor of sex, as confounder
   
   ##==== Age as Confounder ====##
-  
   age<- c(73.5, 76.4, 67.7, 63, 55.1, 84.5, 24.3, 72.1, 71.7, 70.3, 73.4, 51.5, 52.5, 49.5, 59.2, 57.8, 56.7, 48.1, 66.1, 67.2, 67.6,
           41.5, 74.7, 36.3, 75.4, 74.2, 77.8, 59.9) # change to get the data from conf$sex.id but having trouble due to integer/double type. 
   
@@ -124,8 +122,8 @@ init.mRNA <- function(){
   
   return(mrna.design)
 }
-##===== Drained Vs Control (DVC) =====##
 
+##===== Drained Vs Control (DVC) =====##
 mRNA_DVC <- function(save = TRUE){
   mrna.design <- init.mRNA()
   #= Contrasts =#
