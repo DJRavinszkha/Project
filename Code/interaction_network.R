@@ -134,11 +134,11 @@ miRNA_mRNA_interaction_network <- function(mRNA,
   
   # Create miRNA ID's
   IDs <- unique(network_data[,"mirna"])
-  miRNA_ID <- matrix(ncol = 5, nrow = length(IDs))
+  miRNA_ID <- matrix(ncol = 3, nrow = length(IDs))
   miRNA_ID[,2] <- as.character(IDs)                               # Get all unqiue miRNA names
   miRNA_ID[,1] <- seq(0,length(IDs) - 1)
   miRNA_ID[,3] <- "miRNA"
-  colnames(miRNA_ID) <- c("ID", "name", "Group", "Symbol", "Genename")
+  colnames(miRNA_ID) <- c("ID", "name", "Group")
   
   # Create mRNA ID's
   IDs <- unique(network_data[,"mRNA"])

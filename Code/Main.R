@@ -299,11 +299,6 @@ mirna_mrna.CHVC_network <- visualise_network(mirna_mrna.CHVC[[1]], mirna_mrna.CH
                                              bounded = FALSE,
                                              saveName = "miRNA-mRNA interaction network CHvC.html")
 
-mirna_mrna.CHVD <- miRNA_mRNA_interaction_network(mRNA.CHVD[[1]], miRNA.CHVD[[1]])
-visualise_network(mirna_mrna.CHVD[[1]], mirna_mrna.CHVD[[2]])
-
-
-
 #===========================================================#
 ##           5.3 ~ Gene Ontology interaction networks      ##
 #===========================================================#
@@ -342,4 +337,3 @@ visualise_network(mRNA.GO.network.data.CHVC.CC[[1]],
                   edgeWidth = 1,
                   saveName = "GO cellular component network.html",
                   silent = FALSE)
-

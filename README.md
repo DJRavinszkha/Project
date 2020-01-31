@@ -6,7 +6,7 @@ CorQBase is a R pipeline for the identification of miRNA-mRNA interactions for c
      * The main pipeline that runs all of the files
      * Initialises lists using dataFormatting.R and identified differentially expressed (DE) miRNA and mRNA using Expression_Analysis.R
      * Performs Gene Ontology enrichment using gene_ontology.R
-     * Plots plots using PCA.R and Plots.R
+     * Visualises plots using PCA.R and Plots.R
      * Creates network using interaction_network.R
      
 ## package_Manager.R
@@ -19,7 +19,7 @@ CorQBase is a R pipeline for the identification of miRNA-mRNA interactions for c
         * ggplot2, gplots, cowplot, ggdendro and dendextend
 
 ## dataFormatting.R
-     * Is a function called format()
+     * Contains a function called format()
      * Collects Raw data and produces 4 objects:
         * mRNA is the expression profile of mRNA levels
         * miRNA is the expression profile of miRNA levels
@@ -29,7 +29,7 @@ CorQBase is a R pipeline for the identification of miRNA-mRNA interactions for c
 ## PCA.R
      * dataFormatting.R objects are collected using format()
      * plots the PCA of mRNA and miRNA expression and color codes the plots based on batches and treatment
-     * It was identified that batch correctin needed to be implemented, and thus is implemented in PCA.R
+     * It was identified that batch correction needed to be implemented, and thus is implemented in PCA.R
      * plots for corrected expression levels were then created using PCA.R
      
 ## Expression_Analysis.R
@@ -40,14 +40,14 @@ CorQBase is a R pipeline for the identification of miRNA-mRNA interactions for c
      * Finally identifies significantly DE mRNA and miRNA
      
 ## miRNA_Target_Analysis.R
-     * Inputs:
-        * DE miRNAs from Expression_Analysis.R
-     * Identifies mRNA targets given DE miRNAs using multiMiR
-        * multiMiR accesses miRecords, miRTarBase and TarBase databases
-     * Calculates pearson correlation between miRNA and mRNA targets.
-     * Outputs:
-        * Correlation matrix of DE miRNA and mRNA targets
-        * Validated mRNA-miRNA interactions
+     * miRNA_correlate():
+        * Calculates pearson correlation between all possible pairs of miRNA and mRNA that you input
+     * miRNA_target_query_targetHUB()
+        * Uses the targetHUB API to query miRNA targets
+    * miRNA.targets()
+        * uses multiMiR which accesses miRecords, miRTarBase and TarBase databases to query miRNA targets
+     * miRNA_target_overlap:
+        * Find overlapping interactions between two sets of interactions
 
 ## Gene_ontology.R
     * Inputs:
@@ -59,8 +59,8 @@ CorQBase is a R pipeline for the identification of miRNA-mRNA interactions for c
     
 ## interaction_network.R
      * Generates and builds interaction network
-     * Inputs:
-        * miRNA-mRNA interactions from miRNA_Target_Analysis.R
+     * Possible inputs:
+        * miRNA-mRNA interactions
         * Top DE miRNAs and mRNAs from Expression_Analysis.R
      * Outputs: 
         * miRNA-mRNA interaction network 
@@ -76,7 +76,7 @@ CorQBase is a R pipeline for the identification of miRNA-mRNA interactions for c
         * Hierarchical cluster dendrogram of miRNA similarity
         
 ## Demographic_Analysis.R
-     * Creates table containing confounder and demographic data
+     * Creates table containing confounders and demographic data
 
 ## Citing
 Adriane Fosch-Mutané, Jip de Kok, Stefain Meier, Ravin Schmidl (2019). CorQBase: miRNA-mRNA interactions from complex disease expression profiles in R. https://github.com/DJRavinszkha/Project/
