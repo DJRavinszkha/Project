@@ -79,4 +79,4 @@ CorQBase is a R pipeline for the identification of miRNA-mRNA interactions for c
      * Creates table containing confounder and demographic data
 
 ## Citing
-Adriane Fosch-Mutané, Jip de Kok, Stefain Meier, Ravin Schmidl (2019). CorQBase: miRNA-mRNA interactions from complex disease expression profiles in R.
+Adriane Fosch-Mutané, Jip de Kok, Stefain Meier, Ravin Schmidl (2019). CorQBase: miRNA-mRNA interactions from complex disease expression profiles in R. https://github.com/DJRavinszkha/Project/
