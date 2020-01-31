@@ -9,31 +9,12 @@
 #          Stefan Meier, ID: I6114194 , Maastricht University                 #
 #=============================================================================#
 
-##====Initialise Data from dataFormatting.R====##
-# source("dataFormatting.R")
-# Data <- format() #Remember to run dataFormatting.R first before initialising data
-# mrna <- data.frame(Data[1]) #mRNA expression data (contains entrez ID as index)
-# mirna <- data.frame(Data[2]) #miRNA expression data (contains miRNA name as index)
-# labels <- data.frame(Data[3]) #batch and treatment id/labels for samples
-# key <- data.frame(Data[4]) #entrezID to genesymbol key
-
-# ##==== PCA Initialisation ====##
-# current_path <- getActiveDocumentContext()$path 
-# setwd(dirname(current_path))
-# source("PCA.R")
-
-# #= Sample Groups =#
-# sampleGroups <- data.frame(treatment = labels$treatment, treatment.id = labels$treatment.id, sampleName = labels$sample.name)
-# 
-# # Get batch order mrna (copied from pca)
-# mrna.batches <- data.frame(batch = labels$mRNA.batch, batch.id = labels$mRNA.batch.id, file = labels$mRNA.file)
-
 #====================================#
 ##            Functions             ##
 #====================================#
 
 #====================================#
-##  Function to initialise design   ##    #Note: Could use edgeR for miRNA and DESeq2 for miRNA
+##  Function to initialise design   ##
 #====================================#
 design <- function(object, contrasts.arg, batch, names){
   d <- model.matrix(object, 
@@ -45,7 +26,7 @@ design <- function(object, contrasts.arg, batch, names){
 }
 
 #====================================#
-##   Function to initialise model   ##    #Note: Could use edgeR for miRNA and DESeq2 for miRNA
+##   Function to initialise model   ##
 #====================================#
 fit.eb <- function(data, design, cont){
   fit <- lmFit(data, design)          
@@ -77,22 +58,19 @@ volcano <- function(fit.eb){
   }
 }
 
+
 #====================================#
 ## Differential Expression Analysis ##
 #====================================#
-
-
 
 #============================================#
 ##                   mRNA                   ##
 #============================================#
 
 init.mRNA <- function(){
-  #mrna.corrected <- removeBatchEffect(mrna, factor(labels$mRNA.batch.id), design=design1) Move to PCA; only useful for visualisation
-  #When we creqte this function, design be one of the outputs to be called in PCA.R
+  #mrna.corrected <- removeBatchEffect(mrna, factor(labels$mRNA.batch.id), design=design1) Moved to PCA; only used for visualisation
   
-  #Initialise metadata (age, sex and bilirubin lvels). Move to dataFormatting.R. 
-  #Refer to whatsapp files to download correct file, 
+  #Initialise metadata (age, sex and bilirubin lvels). Move to dataFormatting.R.
   mrna.meta <- read.delim("../Data/metadata_mrna.csv", sep=',',header = TRUE, colClasses = 'character')
   conf.mrna <- data.frame(sample.name = mrna.meta$Sample[1:28], sex = mrna.meta$gender[1:28], age = mrna.meta$age[1:28], bili.tot = mrna.meta$Bili..tot.[1:28])
   
@@ -115,7 +93,7 @@ init.mRNA <- function(){
   colnames.mrnaDesign <- c("cholestasis", "drained", "control",
                            "batch2","batch3","batch4", "batch5",
                            "sex","age")
-  mrna.design <- design(~0 + factor(labels$treatment.id) + factor(labels$mRNA.batch.id) + sex + age,
+  mrna.design <- design(~ 0 + factor(labels$treatment.id) + factor(labels$mRNA.batch.id) + sex + age,
                         list(state=contrasts(state, contrasts=TRUE)),
                         contrasts(batch, contrasts = TRUE),
                         colnames.mrnaDesign)
@@ -159,6 +137,7 @@ mRNA_DVC <- function(save = TRUE){
   
   return(list(mrna.DEG.DVC, namesTop.mrna.DVC))
 }
+
 ##===== Cholestatic Vs Control (CHVC) =====##
 
 mRNA_CHVC <- function(save = TRUE){
@@ -259,7 +238,6 @@ init.miRNA <- function(){
   sex.mirna<- factor(conf.mirna$sex.id) #Create a factor of sex, as confounder
   
   ##==== Age as Confounder ====##
-  #age<- as.numeric(conf$age) #Didn????t create factor due to number of unique ages; therefore kept it a vector
   age.mirna<- c(73.5, 63.0, 72.1, 73.4, 49.5, 57.8, 66.1, 41.5, 75.4, 76.4, 67.7, 84.5, 71.7, 51.5, 59.2, 56.7,
                 67.2, 74.7, 77.8, 55.1, 24.3, 70.3, 52.5, 48.1, 67.6, 36.3, 74.2, 59.9)
   # Warning: Don't use on design2 factor(labels$treatment.id) it is sorted on the mrna order not miRNA. 

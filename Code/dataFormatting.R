@@ -21,14 +21,14 @@ mirna = read.delim('../Data/miRNAexpression.txt', check.names = FALSE)        #L
 
 #Initialise a dataframe called labels, containing all:
 # file/batch names and sample names 
-# batch numbers and an int id attached to it
-# treatments and an int id attached to it
+# batch numbers and an integer id attached to it
+# treatments and an integer id attached to it
 labels = read.delim("../Data/colNames.csv", sep = ',', header = FALSE, colClasses = 'character')
 
 labels$V4 <- colnames(mrna[3:30])
-key <- mrna[,1:2] # Key for maintaining gene symbol and entrez gene ID
+key <- mrna[,1:2]                   # Key for maintaining gene symbol and entrez gene ID
 
-labels$V1 <- colnames(mirna[2:29]) #maintaining names for mirna filenames
+labels$V1 <- colnames(mirna[2:29])  #maintaining names for mirna filenames
 
 #Here we initialise batch number id's of mRNA's
 labels$V5 <- substr(unlist(labels$V4), 8, 13) 
@@ -65,33 +65,16 @@ labels$treatment.id[labels$treatment == "control"] <- 3     #set id 3 to control
 #=== Here we change the columns names of mrna (mRNA samples) to the sample names ===
 mrna = subset(mrna, select = -2)                     # Remove gene symbol column
 columns = colnames(mrna)
-columns[2:29] <- substr(unlist(columns[2:29]), 1, 6) #Only keep first 6 characters of column names
+columns[2:29] <- substr(unlist(columns[2:29]), 1, 6) # Only keep first 6 characters of column names
 colnames(mrna) <- columns                            # Assign this to the actual column names
 
-#=== Here we change the columns names of mirna (miRNA samples) to the sample names ===
-# 
-# columns[[1]] <- 'miRNA'
-# for (i in rep(2:length(colnames(mirna)))){
-#   for ( j in rep(1:nrow(labels))){
-#     if(colnames(mirna[i]) == labels[j,1]){
-#       columns[[i]] = labels[j,3] # Assign correct column name to array
-#       # print(labels[j,1])
-#       # print(colnames(mirna[i]))
-#       # print(labels[j, 3])
-#       # print("======")
-#     }
-#   }
-# }
-#There is something wrong with naming as FGS_01 is not the first columns and last column is NA
-
-
 #mrna
-rownames(mrna) <- mrna[,1] # Set entrezid as index for mrna; can use key to find gene symbols based on index
-mrna <- mrna[,2:29]        # Set mrna to only contain expression values
+rownames(mrna) <- mrna[,1]    # Set entrezid as index for mrna; can use key to find gene symbols based on index
+mrna <- mrna[,2:29]           # Set mrna to only contain expression values
 
 #mirna
-rownames(mirna) <- mirna[,1] # Set mirna names as index for mirna
-mirna <- mirna[,2:29]        # Set mirna to only contain expression values
+rownames(mirna) <- mirna[,1]  # Set mirna names as index for mirna
+mirna <- mirna[,2:29]         # Set mirna to only contain expression values
 colnames(mirna) <- labels$sample.name[order(labels$treatment.id)] ##REQUIRED!!!! in order to preserve order of miRNA sample naming
 
 #= Sample Groups =#
@@ -118,69 +101,3 @@ mrna.batches <- data.frame(batch = labels$mRNA.batch, batch.id = labels$mRNA.bat
 
 # Get batch order mirna
 mirna.batches <- data.frame(batch = labels$miRNA.batch, batch.id = labels$miRNA.batch.id, file = labels$mRNA.file, sort= FALSE)
-
-
-
-#=============================#
-##   Create phenotype data   ##     # Do we need this?
-#=============================#
-# pheno.mrna = labels
-# pheno.mrna[[1]] <- colnames(mrna)
-# colnames(pheno.mrna) <- c("", "Subtype", "ER")
-# 
-# # Set controls
-# case <- pheno.mrna[,'Subtype'] == "cholestatic"
-# pheno.mrna[case,3] <- 'case'
-# 
-# # Set drained
-# case <- pheno.mrna[,'Subtype'] == "drained"
-# pheno.mrna[case,3] <- 'case'
-# 
-# # set controls
-# case <- pheno.mrna[,'Subtype'] == "control"
-# pheno.mrna[case,3] <- 'control'
-# 
-# # Order cases and controls
-# pheno.mrna <- pheno.mrna[order(as.character(pheno.mrna$ER)),]
-# 
-# # Set pheno.mirna which is identical to pheno.mrna
-# pheno.mirna = pheno.mrna
-# 
-#===============================#
-## Summarised experiment class ##   #Do we need this?
-#===============================#
-
-# First we change the dataframes into matrices as the miRrna package works with matrices.
-# pheno.mrna <- as.matrix(pheno.mrna)
-# pheno.mirna <- as.matrix(pheno.mirna)
-# mrna = data.matrix(mrna)
-# mirna = data.matrix(mirna)
-# 
-# # Fill NA's with mean for the time-being
-# mrna[is.na(mrna)] <- mean(mrna, na.rm = TRUE)
-# mirna[is.na(mirna)] <- mean(mirna, na.rm = TRUE)
-# 
-# # Remove drained cases from mrna
-# index = rep(TRUE, length(colnames(mrna)))
-# for(i in 1:length(colnames(mrna))){
-#   # if current column name is present in a list of all column names of cases:
-#   if(colnames(mrna)[i] %in% pheno.mrna[pheno.mrna[,2]=="drained",1]){
-#     index[i] <- FALSE
-#   }
-# }
-# mrna <- mrna[,index]
-# 
-# # Remove drained cases from mirna
-# index = rep(TRUE, length(colnames(mirna)))
-# for(i in 1:length(colnames(mirna))){
-#   # if current column name is present in a list of all column names of cases:
-#   if(colnames(mirna)[i] %in% pheno.mirna[pheno.mirna[,2]=="drained",1]){
-#     index[i] <- FALSE
-#   }
-# }
-# mirna <- mirna[,index]
-# 
-# # Remove drained cases from the phenotype data
-# pheno.mrna <- pheno.mrna[!(pheno.mrna[,2]=="drained"),]
-# pheno.mirna <- pheno.mirna[!(pheno.mirna[,2]=="drained"),]
-

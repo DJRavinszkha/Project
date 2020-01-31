@@ -1,5 +1,13 @@
-#==============#
-# meta data analysis
+#=============================================================================#
+# Project Period, Liver cholestasis data analysis         							      #					  
+#	Demographic Analysis                                                        #
+# Version: 1.0   															                                #
+# Date: 9-1-2020											             	                          #
+# Authors: Ariadna Fosch i Muntané, ID: I6215203, Maastricht University       #
+#          Jip de Kok, ID: I6119367 , Maastricht University                   #
+#          Ravin Schmidl, ID: I6125866, Maastricht University                 #
+#          Stefan Meier, ID: I6114194 , Maastricht University                 #
+#=============================================================================#
 
 metadata <- read.delim('../Data/metadata_mrna_adapt.csv', sep =",", check.names = FALSE)
 

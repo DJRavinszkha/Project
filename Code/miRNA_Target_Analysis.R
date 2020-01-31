@@ -1,9 +1,9 @@
 #=============================================================================#
 # Project Period, Liver cholestasis data analysis         							      #					  
-#	Data Formatting                                                             #
+#	miRNA Target analysis                                                       #
 # Version: 1.0   															                                #
 # Date: 9-1-2020											             	                          #
-# Authors: Ariadna Fosch i Muntané, ID: I6215203, Maastricht University       #
+# Authors: Ariadna Fosch i Muntané, ID: I6215203, Maastricht University      #
 #          Jip de Kok, ID: I6119367 , Maastricht University                   #
 #          Ravin Schmidl, ID: I6125866, Maastricht University                 #
 #          Stefan Meier, ID: I6114194 , Maastricht University                 #
@@ -21,7 +21,7 @@ miRNA_correlate <- function(miRNA, mRNA,
                             mRNA_DEG = NULL,
                             mrna.treatmentOrder = NULL){
   #========================================================================================================#
-  # This function calculates pearson correlations between micro- and messenger RNA expression              #
+  # This function calculates pearson correlations between micro- and messenger RNA expression values       #
   # You will input the RNA expression values for your group of interest (e.g. all cases)                   #
   # The output is a correlation matrix, showing the correlation between each possible pair of micro- and   #
   # messenger RNA and its significance value (p-value)                                                     #
@@ -173,19 +173,30 @@ miRNA_target_query_targetHUB <- function(mirna, mrna){
 ##       Query miRNA Targets with multiMiR      ##
 #================================================#
 miRNA.targets <- function(mRNA, miRNA, removeDuplicates = TRUE){
-  mirna.targets <- get_multimir(mirna = miRNA$mirna.Name, summary = TRUE)
+  #========================================================================================================#
+  # This function lookup miRNA targets from various databases using the multiMiR package                   #
+  #                                                                                                        #
+  # https://bioconductor.org/packages/release/bioc/html/multiMiR.html                                      #
+  #                                                                                                        #
+  # Yuanbin Ru*, Katerina J. Kechris*, Boris Tabakoff, Paula Hoffman, Richard A. Radcliffe, Russell Bowler,#
+  # Spencer Mahaffey, Simona Rossi, George A. Calin, Lynne Bemis, and Dan Theodorescu. (2014) The multiMiR #
+  # R package and database: integration of microRNA-target interactions along with their disease and drug  #
+  # associations. Nucleic Acids Research, doi: 10.1093/nar/gku631. (* Equal contribution)                  #                                               #
+  #========================================================================================================#
+  
+  mirna.targets <- get_multimir(mirna = miRNA$mirna.Name, summary = TRUE)       # Run the multiMiR query to get miRNA targets
   targets.names <- data.frame(mRNA = mirna.targets@data$target_entrez, 
                                    mirna = mirna.targets@data$mature_mirna_id,
                                    source = mirna.targets@data$pubmed_id)
   
-  mRNA$mRNA <- rownames(mRNA)
-  targets.DEG <- merge(targets.names, mRNA, by = "mRNA", sort = FALSE)
+  mRNA$mRNA <- rownames(mRNA)                                                   # Set mRNA names
+  targets.DEG <- merge(targets.names, mRNA, by = "mRNA", sort = FALSE)          # Only keep mRNAs that are DE in our data
   targets.DEG <- targets.DEG[!duplicated(
-    targets.DEG[,c("mRNA", "mirna", "source")]),] # Remove duplicates from same publication
+    targets.DEG[,c("mRNA", "mirna", "source")]),]                               # Remove duplicates from same publication
   
   if (removeDuplicates == TRUE){
     targets.DEG[,"source"] <- 1
-    targets.DEG <- aggregate(source ~ mRNA + mirna, data = targets.DEG, sum)
+    targets.DEG <- aggregate(source ~ mRNA + mirna, data = targets.DEG, sum)    # Remove duplicate interactions and count occurances
   }
   
   return(targets.DEG)

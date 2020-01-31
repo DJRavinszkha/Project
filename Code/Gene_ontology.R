@@ -1,6 +1,6 @@
 #=============================================================================#
 # Project Period, Liver cholestasis data analysis         							      #					  
-#	Expression Analysis                                                         #
+#	Gene Ontology                                                               #
 # Version: 1.0   															                                #
 # Date: 9-1-2020											             	                          #
 # Authors: Ariadna Fosch i Muntané, ID: I6215203, Maastricht University       #
@@ -13,17 +13,18 @@
 ##              Functions                ##
 #=========================================#
 
-GO <- function(p, #mrna.DEG.CHVC$adj.P
+#===================================================#
+##    function to perform gene ontology analysis    #
+#===================================================# 
+GO <- function(p,
                names, 
                Onto){
   allGO2genes <-annFUN.org(whichOnto = Onto, 
                            feasibleGenes = NULL, 
                            mapping = "org.Hs.eg.db", 
                            ID = "entrez")
-  
   all <- p
   names(all)<-names
-  
   
   GO <- new("topGOdata", 
             ontology = Onto,
@@ -31,13 +32,15 @@ GO <- function(p, #mrna.DEG.CHVC$adj.P
             annot = annFUN.GO2genes,
             geneSel = function(x)x,
             GO2genes = allGO2genes,
-            nodeSize = 10
-  )
+            nodeSize = 10)
   
   print(GO)
   return(GO)
 }
 
+#==============================================#
+##    function generate gene ontology plots    #
+#==============================================# 
 plotGO <- function(GO, 
                    show, #number of topNodes to be shown
                    title,
@@ -82,7 +85,6 @@ plotGO <- function(GO,
   if(save){
     ggsave(main_Title, plot = goplot, path = "../Figures/", 
            width = 640, height = 480, units = "mm")
-    # dev.off()
   }
   print(goplot)
   return(list(results.ks, enrichment))
@@ -91,7 +93,6 @@ plotGO <- function(GO,
 GO.adj.mat <-function(GO, DEG){
   
   ann.genes <- genesInTerm(GO, usedGO(GO)) ## get the annotations
-  # data <- DEG[[1]]$mRNA
   data <- rownames(DEG[[1]])
   
   # Initialize adj matrix
@@ -163,7 +164,6 @@ get_GO <- function(mRNA,
              pdfSW = TRUE
   )
   return(list(GO, result.ks, enrichment))
-  
 }
 
 #=========================================#

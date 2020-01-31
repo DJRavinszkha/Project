@@ -13,7 +13,6 @@
 ##    1. PCA Function    ## 
 #=========================#
 
-
 PCA <- function(data, 
                 data.treatmentOrder, 
                 treat, 
@@ -23,17 +22,6 @@ PCA <- function(data,
                 main_Title, 
                 save = TRUE
 ) {
-  #Usage:
-  #   PCA(mirna, 
-  #       mirna.treatmentOrder$treatment, 
-  #       0,
-  #       mirna.batches$batch, 
-  #       "miRNA pca coloured by Treatment", 
-  #       "miRNA pca coloured by Batch"
-  #   )
-  #=  miRNA corrected  =#
-  
-  
   #= PCA =#
   pcaRes_data <- pca(t(data),nPcs = 10)  # perform PCA
   data.PCA <- data.frame(c(pcaRes_data@scores[,1]),
@@ -120,68 +108,19 @@ PCA.mirna <- function(main_Title, save = TRUE) {
   
   return(plot)
 }
-#================#
-## 4. Heat maps ##
-#================#
-# Don't remove only silenced because it takes too much time to run. 
-
-#heatmap.2(as.matrix(mrna), trace = "none", main="mRNA heatmap")
-#heatmap.2(as.matrix(na.omit(mirna)), trace = "none", main="miRNA heatmap")
-
-
-#========================================================================#
-## 5. PCA showing batches and treatment simultaneously (symbol & color) ## 
-#========================================================================#
-#Don't remove just in case we need it. 
-#Note: Remember to change variables as outlined in parts 2 and 3
-
-
-# pcaRes2 <- pca(t(mrna),nPcs = 10)  # perform PCA
-# PCA_28mrna<- data.frame(c(pcaRes2@scores[,1]),
-#                         pcaRes2@scores[,2],
-#                         pcaRes2@scores[,3],
-#                         pcaRes2@scores[,4],
-#                         pcaRes2@scores[,5],
-#                         batch= batch_number_mrna) 
-# colnames(PCA_28mrna) = c("PCA1", "PCA2", "PCA3","PCA4", "PCA5", "Batches")
-# 
-# ggplot(PCA_28mrna, aes(x = PCA1, y = PCA2)) +
-#   geom_point(aes(colour = PCA_mrna$treat, shape=PCA_28mrna$Batches)) +
-#   scale_colour_manual(values = c("#04179b", "#da9e00", "#198c19","#66049b"),
-#                       aesthetics = "fill") +
-#   theme_light()
-# 
-# mirna = read.delim('../Data/miRNAexpression.txt', check.names = FALSE)
-# batch_number_mirna <- data.frame(Batch_num= substr(unlist(colnames(mirna[,2:length(mirna)])), 12, 23)) #Only keep the batch number 
-# name_batches_mirna<- unique(batch_number_mirna)
-# 
-# pcaRes <- pca(t(mirna[,2:29]),nPcs = 10)  # perform PCA
-# PCA_28mirna<- data.frame(c(pcaRes@scores[,1]),
-#                         pcaRes@scores[,2],
-#                         pcaRes@scores[,3],
-#                         pcaRes@scores[,4],
-#                         pcaRes@scores[,5],
-#                         batch= batch_number_mirna) 
-# colnames(PCA_28mirna) = c("PCA1", "PCA2", "PCA3","PCA4", "PCA5", "Batches")
-# 
-# ggplot(PCA_28mirna, aes(x = PCA1, y = PCA2)) +
-#   geom_point(aes(colour = PCA_28mirna$Batches)) +
-#   scale_colour_manual(values = c("#04179b", "#da9e00", "#198c19","#66049b"),
-#                       aesthetics = "fill") +
-#   theme_light()
 
 #=============================#
-## 6. ANOVA (mrna and mirna) ##
+## 4. ANOVA (mrna and mirna) ##
 #=============================#
 
-# Anova testing mRNA
+# Anova testing mRNA batch variability
 mrna.Anova <- function(){
   mrna.means <- data.frame(means= rowMeans(t(mrna),na.rm = TRUE))
   mrna.Anova <- aov(mrna.means[,1]~mrna.batches[,1])
   mrna.Tukey <- TukeyHSD(mrna.Anova, ordered = FALSE, conf.level = 0.95)
 }
 
-# Anova Testing miRna
+# Anova Testing miRna batch variability
 mirna.Anova <- function(){
   mirna.means <- data.frame(means= rowMeans(t(mirna),na.rm = TRUE))
   mirna.Anova <- aov(mirna.means[,1]~mirna.batches[,1])
@@ -190,9 +129,8 @@ mirna.Anova <- function(){
 #The anova shows that the mirna doesn't need correction as there is no significant batch variance
 
 #==============================#
-## 7. Batch effect correction ##
+## 5. Batch effect correction ##
 #==============================#
-
 
 # Correction boxplot
 mrna.boxPlot <- function(save = TRUE, title){
@@ -221,7 +159,7 @@ mirna.boxPlot <- function(save = TRUE, title){
   }
 }
 #=============================#
-## 8. PCA for corrected data ##
+## 6. PCA for corrected data ##
 #=============================#
 
 ##====  mRNA corrected  ====##
@@ -262,7 +200,3 @@ PCA.mirnaCorrected <- function(main_Title, save = save){
   )
   return(plot)
 }
-
-# Interbatch variability was very high before the correction. This didn't allow us to see the 
-# Intrabatch variability. After the correction all batches are more similar and we can see the
-# intrabatch variability.

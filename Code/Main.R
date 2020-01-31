@@ -1,6 +1,6 @@
 #=============================================================================#
 # Project Period, Liver cholestasis data analysis                             #					  
-#	Data Formatting                                                       #
+# Main file that runs all other scripts and functions                         #
 # Version: 1.0   			                                      #
 # Date: 9-1-2020							      #
 # Authors: Ariadna Fosch i Muntané, ID: I6215203, Maastricht University       #
@@ -104,29 +104,6 @@ heatmap(mrna,
         "mRNA heatmap (CHVD)", 
         save = TRUE,
         "../Figures/Heatmap_mRNA_CHVD.pdf")
-
-
-# #===========================================================#
-# ##             2.3 ~ Principal Component Analysis          ##
-# #===========================================================#
-# 
-# #= perform PCA on mRNA data =#
-# PCA.mrna("PCA_mRNA_treatment.pdf", save = TRUE)
-# PCA.mrnaCorrected("PCA_mRNA_Corrected.pdf", save = TRUE)
-
-# #===========================================================#
-# ##                  2.4 ~ Create boxplots                  ##
-# #===========================================================#
-# 
-# #= Box Plots =#
-# mrna.boxPlot(save = TRUE, "../Figures/Boxplot_mRNA.pdf")
-# 
-# #===========================================================#
-# ##              2.5 ~ Run Anova on mRNA data               ##
-# #===========================================================#
-# 
-# #= Anova =#
-# mRNA_Anova <- mrna.Anova()
 
 #=============================================================================#
 #=====                     3 ~ miRNA ANALYSIS                            =====#
@@ -281,8 +258,6 @@ target_overlap_network_visualisation <- visualise_network(target_overlap_network
                                                           saveName = "multiMiR and correlation filter network.html")
 
 
-
-
 #===========================================================#
 ##               5.1 ~ Correlation based network           ##
 #===========================================================#
@@ -333,6 +308,7 @@ visualise_network(mirna_mrna.CHVD[[1]], mirna_mrna.CHVD[[2]])
 ##           5.3 ~ Gene Ontology interaction networks      ##
 #===========================================================#
 
+# Gene ontology network for Biological Processes
 mRNA.CHVC.GO.Network.BP <- longFormat.Enrichment(GO.mRNA.CHVC.BP[[1]], mRNA.CHVC, GO.mRNA.CHVC.BP[[3]])
 mRNA.GO.network.data.CHVC.BP <- generate_network_data(mRNA.CHVC.GO.Network.BP,
                                                       group1 = "GO: Biological Process",
@@ -344,7 +320,7 @@ visualise_network(mRNA.GO.network.data.CHVC.BP[[1]],
                   silent = FALSE)
 
 
-
+# Gene ontology network for Molecular Functions
 mRNA.CHVC.GO.Network.MF <- longFormat.Enrichment(GO.mRNA.CHVC.MF[[1]], mRNA.CHVC, GO.mRNA.CHVC.MF[[3]])
 mRNA.GO.network.data.CHVC.MF <- generate_network_data(mRNA.CHVC.GO.Network.MF,
                                                       group1 = "GO: Molecular Function",
@@ -356,7 +332,7 @@ visualise_network(mRNA.GO.network.data.CHVC.MF[[1]],
                   silent = FALSE)
 
 
-
+# Gene ontology network for Cellular Components
 mRNA.CHVC.GO.Network.CC <- longFormat.Enrichment(GO.mRNA.CHVC.CC[[1]], mRNA.CHVC, GO.mRNA.CHVC.CC[[3]])
 mRNA.GO.network.data.CHVC.CC <- generate_network_data(mRNA.CHVC.GO.Network.CC,
                                                       group1 = "GO: Cellular Component",
